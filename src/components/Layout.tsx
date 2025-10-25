@@ -1,5 +1,10 @@
 import { ReactNode, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { ChatBot } from "@/components/ChatBot";
 import logo from "@/assets/logo.jpg";
 
 interface LayoutProps {
@@ -15,7 +20,9 @@ export const Layout = ({ children, showNav = true }: LayoutProps) => {
   const [logoClicks, setLogoClicks] = useState(0);
   const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
   const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleLogoClick = () => {
     const newClicks = logoClicks + 1;
@@ -41,8 +48,41 @@ export const Layout = ({ children, showNav = true }: LayoutProps) => {
     }
   };
 
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email) {
+      toast({
+        title: "Error",
+        description: "Please enter your email",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("newsletter_subscribers")
+        .insert({ email });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success!",
+        description: "You'll receive 10% off your next order!",
+      });
+      setEmail("");
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="border-b border-border bg-card">
         <div className="container mx-auto px-4 py-4">
@@ -78,17 +118,34 @@ export const Layout = ({ children, showNav = true }: LayoutProps) => {
       </header>
 
       {/* Main Content */}
-      <main>{children}</main>
+      <main className="flex-1">{children}</main>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-card mt-16">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center text-muted-foreground">
-            <p className="mb-2">© 2025 Echelon Society. All rights reserved.</p>
-            <p className="text-sm">Established 2017 • A Higher Standard</p>
+      <footer className="border-t border-border bg-card mt-auto">
+        <div className="container mx-auto px-4 py-12">
+          <div className="max-w-md mx-auto text-center space-y-6">
+            <h3 className="text-2xl font-bold text-primary">Thank You for Visiting!</h3>
+            <p className="text-muted-foreground">
+              Subscribe to our newsletter and get 10% off your next order
+            </p>
+            <form onSubmit={handleNewsletterSubmit} className="flex gap-2">
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                className="flex-1"
+              />
+              <Button type="submit">Subscribe</Button>
+            </form>
+            <p className="text-sm text-muted-foreground">
+              © 2025 Echelon Society. A Higher Standard.
+            </p>
           </div>
         </div>
       </footer>
+
+      <ChatBot />
 
       {/* Password Prompt Modal */}
       {showPasswordPrompt && (
