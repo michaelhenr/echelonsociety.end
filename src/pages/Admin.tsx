@@ -6,6 +6,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import * as XLSX from "xlsx";
 
 const Admin = () => {
@@ -15,6 +20,15 @@ const Admin = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
   const [ads, setAds] = useState<any[]>([]);
+  const [editingProduct, setEditingProduct] = useState<any | null>(null);
+  const [editForm, setEditForm] = useState({
+    name: "",
+    description: "",
+    price: "",
+    category: "",
+    brandId: "",
+    imageUrl: "",
+  });
 
   useEffect(() => {
     checkAdminAccess();
@@ -104,6 +118,61 @@ const Admin = () => {
     } else {
       toast({ title: "Success", description: "Ad deleted" });
       fetchData();
+    }
+  };
+
+  const openEditDialog = (product: any) => {
+    setEditingProduct(product);
+    setEditForm({
+      name: product.name,
+      description: product.description || "",
+      price: product.price.toString(),
+      category: product.category,
+      brandId: product.brand_id,
+      imageUrl: product.image_url || "",
+    });
+  };
+
+  const handleUpdateProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!editForm.name || !editForm.price || !editForm.category || !editForm.brandId) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("products")
+        .update({
+          name: editForm.name,
+          description: editForm.description,
+          price: parseFloat(editForm.price),
+          category: editForm.category,
+          brand_id: editForm.brandId,
+          image_url: editForm.imageUrl,
+        })
+        .eq("id", editingProduct.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success!",
+        description: "Product updated successfully",
+      });
+
+      setEditingProduct(null);
+      fetchData();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   };
 
@@ -212,9 +281,14 @@ const Admin = () => {
                         <TableCell>{product.brands?.name}</TableCell>
                         <TableCell>{product.price} EGP</TableCell>
                         <TableCell>
-                          <Button variant="destructive" size="sm" onClick={() => deleteProduct(product.id)}>
-                            Delete
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button variant="outline" size="sm" onClick={() => openEditDialog(product)}>
+                              Edit
+                            </Button>
+                            <Button variant="destructive" size="sm" onClick={() => deleteProduct(product.id)}>
+                              Delete
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -292,6 +366,95 @@ const Admin = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Edit Product Dialog */}
+        <Dialog open={!!editingProduct} onOpenChange={(open) => !open && setEditingProduct(null)}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Edit Product</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleUpdateProduct} className="space-y-4">
+              <div>
+                <Label htmlFor="edit-name">Product Name *</Label>
+                <Input
+                  id="edit-name"
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="edit-description">Description</Label>
+                <Textarea
+                  id="edit-description"
+                  value={editForm.description}
+                  onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                  rows={4}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="edit-price">Price (EGP) *</Label>
+                <Input
+                  id="edit-price"
+                  type="number"
+                  value={editForm.price}
+                  onChange={(e) => setEditForm({ ...editForm, price: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="edit-category">Category *</Label>
+                <Select value={editForm.category} onValueChange={(value) => setEditForm({ ...editForm, category: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Sweatshirts">Sweatshirts</SelectItem>
+                    <SelectItem value="Hoodies">Hoodies</SelectItem>
+                    <SelectItem value="T-Shirts">T-Shirts</SelectItem>
+                    <SelectItem value="Accessories">Accessories</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="edit-brand">Brand *</Label>
+                <Select value={editForm.brandId} onValueChange={(value) => setEditForm({ ...editForm, brandId: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select brand" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {brands.map((brand) => (
+                      <SelectItem key={brand.id} value={brand.id}>
+                        {brand.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="edit-imageUrl">Image URL</Label>
+                <Input
+                  id="edit-imageUrl"
+                  type="url"
+                  value={editForm.imageUrl}
+                  onChange={(e) => setEditForm({ ...editForm, imageUrl: e.target.value })}
+                />
+              </div>
+
+              <div className="flex gap-2 justify-end">
+                <Button type="button" variant="outline" onClick={() => setEditingProduct(null)}>
+                  Cancel
+                </Button>
+                <Button type="submit">Update Product</Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </Layout>
   );

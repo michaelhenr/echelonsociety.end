@@ -80,10 +80,10 @@ const SubmitProduct = () => {
           <div className="bg-yellow-50 border border-yellow-200 p-4 rounded mb-6">
             <p className="text-yellow-800">
               No brands found. Please{" "}
-              <Button variant="link" className="p-0" onClick={() => navigate("/submit-brand")}>
-                submit your brand
+              <Button variant="link" className="p-0" onClick={() => navigate("/")}>
+                create a brand
               </Button>{" "}
-              first.
+              first by selecting "Register Your Brand" option.
             </p>
           </div>
         )}
@@ -137,18 +137,23 @@ const SubmitProduct = () => {
 
           <div>
             <Label htmlFor="brand">Brand *</Label>
-            <Select value={formData.brandId} onValueChange={(value) => setFormData({ ...formData, brandId: value })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select brand" />
-              </SelectTrigger>
-              <SelectContent>
-                {brands.map((brand) => (
-                  <SelectItem key={brand.id} value={brand.id}>
-                    {brand.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex gap-2">
+              <Select value={formData.brandId} onValueChange={(value) => setFormData({ ...formData, brandId: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select brand" />
+                </SelectTrigger>
+                <SelectContent>
+                  {brands.map((brand) => (
+                    <SelectItem key={brand.id} value={brand.id}>
+                      {brand.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button type="button" variant="outline" onClick={() => navigate("/")}>
+                Create New Brand
+              </Button>
+            </div>
           </div>
 
           <div>

@@ -26,6 +26,13 @@ export const Layout = ({ children, showNav = true }: LayoutProps) => {
 
   const handleLogoClick = () => {
     const newClicks = logoClicks + 1;
+    
+    if (newClicks === 1) {
+      navigate("/home");
+      setLogoClicks(0);
+      return;
+    }
+    
     setLogoClicks(newClicks);
     
     if (newClicks === 5) {
