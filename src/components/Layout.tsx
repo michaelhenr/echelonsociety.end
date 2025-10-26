@@ -1,5 +1,5 @@
 import { ReactNode, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -22,15 +22,15 @@ export const Layout = ({ children, showNav = true }: LayoutProps) => {
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
 
   const handleLogoClick = () => {
     const newClicks = logoClicks + 1;
     
-    if (newClicks === 1) {
+    // Single click navigates to home only if not already there
+    if (newClicks === 1 && location.pathname !== "/home") {
       navigate("/home");
-      setLogoClicks(0);
-      return;
     }
     
     setLogoClicks(newClicks);
