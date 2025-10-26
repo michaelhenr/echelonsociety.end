@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import * as XLSX from "xlsx";
+import bgLogo6 from "@/assets/bg-logo-6.jpg";
 
 const Admin = () => {
   const { toast } = useToast();
@@ -178,7 +179,12 @@ const Admin = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8">
+      <div 
+        className="min-h-screen bg-cover bg-center bg-fixed"
+        style={{ backgroundImage: `url(${bgLogo6})` }}
+      >
+        <div className="bg-background/90 backdrop-blur-sm min-h-screen">
+          <div className="container mx-auto px-4 py-8">
         <h1 className="text-4xl font-bold text-primary mb-8">Admin Dashboard</h1>
 
         <div className="grid md:grid-cols-4 gap-6 mb-8">
@@ -455,6 +461,8 @@ const Admin = () => {
             </form>
           </DialogContent>
         </Dialog>
+          </div>
+        </div>
       </div>
     </Layout>
   );

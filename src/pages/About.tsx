@@ -1,4 +1,6 @@
 import { Layout } from "@/components/Layout";
+import bgLogo10 from "@/assets/bg-logo-10.jpg";
+import bgLogo11 from "@/assets/bg-logo-11.jpg";
 
 /**
  * About page detailing Echelon Society's history and mission
@@ -6,7 +8,12 @@ import { Layout } from "@/components/Layout";
 const About = () => {
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-16">
+      <div 
+        className="min-h-screen bg-cover bg-center bg-fixed"
+        style={{ backgroundImage: `url(${bgLogo10}), url(${bgLogo11})`, backgroundBlendMode: 'overlay' }}
+      >
+        <div className="bg-background/90 backdrop-blur-sm">
+          <div className="container mx-auto px-4 py-16">
         <h1 className="text-4xl font-bold text-center mb-12 text-primary">About Echelon Society</h1>
         
         <div className="max-w-4xl mx-auto space-y-8">
@@ -112,6 +119,8 @@ const About = () => {
               to the communities we serve. Join us in this journey of elegance and impact.
             </p>
           </section>
+        </div>
+          </div>
         </div>
       </div>
     </Layout>

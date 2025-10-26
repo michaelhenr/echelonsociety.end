@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import bgLogo7 from "@/assets/bg-logo-7.jpg";
 
 const SubmitAd = () => {
   const { toast } = useToast();
@@ -62,7 +63,12 @@ const SubmitAd = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8 max-w-2xl">
+      <div 
+        className="min-h-screen bg-cover bg-center bg-fixed"
+        style={{ backgroundImage: `url(${bgLogo7})` }}
+      >
+        <div className="bg-background/90 backdrop-blur-sm min-h-screen">
+          <div className="container mx-auto px-4 py-8 max-w-2xl">
         <h1 className="text-4xl font-bold text-primary mb-8">Submit Advertisement</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -131,6 +137,8 @@ const SubmitAd = () => {
 
           <Button type="submit" className="w-full">Submit Ad</Button>
         </form>
+          </div>
+        </div>
       </div>
     </Layout>
   );

@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useLocation } from "react-router-dom";
+import bgLogo5 from "@/assets/bg-logo-5.jpg";
 
 const Checkout = () => {
   const location = useLocation();
@@ -110,7 +111,12 @@ const Checkout = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8 max-w-2xl">
+      <div 
+        className="min-h-screen bg-cover bg-center bg-fixed"
+        style={{ backgroundImage: `url(${bgLogo5})` }}
+      >
+        <div className="bg-background/90 backdrop-blur-sm min-h-screen">
+          <div className="container mx-auto px-4 py-8 max-w-2xl">
         <h1 className="text-4xl font-bold text-primary mb-8">Checkout</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -188,6 +194,8 @@ const Checkout = () => {
 
           <Button type="submit" className="w-full">Place Order</Button>
         </form>
+          </div>
+        </div>
       </div>
     </Layout>
   );

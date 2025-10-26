@@ -1,8 +1,10 @@
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import vcrew from "@/assets/product-vcrew.jpg";
-import hoodie from "@/assets/product-quarter-hoodie.jpg";
+import vcrew from "@/assets/product-quarter-hoodie.jpg";
+import hoodie from "@/assets/product-vcrew.jpg";
+import bgLogo8 from "@/assets/bg-logo-8.jpg";
+import bgLogo9 from "@/assets/bg-logo-9.jpg";
 
 /**
  * Home page with Echelon Society introduction and featured products
@@ -12,7 +14,12 @@ const Home = () => {
 
   return (
     <Layout>
-      {/* Hero Section */}
+      <div 
+        className="min-h-screen bg-cover bg-center bg-fixed"
+        style={{ backgroundImage: `url(${bgLogo8}), url(${bgLogo9})`, backgroundBlendMode: 'overlay' }}
+      >
+        <div className="bg-background/85 backdrop-blur-sm">
+          {/* Hero Section */}
       <section className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground py-20">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-5xl font-bold mb-4">Echelon Society</h1>
@@ -118,6 +125,8 @@ const Home = () => {
           </div>
         </div>
       </section>
+        </div>
+      </div>
     </Layout>
   );
 };

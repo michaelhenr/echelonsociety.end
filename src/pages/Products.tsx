@@ -6,8 +6,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import vcrew from "@/assets/product-vcrew.jpg";
-import hoodie from "@/assets/product-quarter-hoodie.jpg";
+import vcrew from "@/assets/product-quarter-hoodie.jpg";
+import hoodie from "@/assets/product-vcrew.jpg";
+import bgLogo5 from "@/assets/bg-logo-5.jpg";
+import bgLogo6 from "@/assets/bg-logo-6.jpg";
+import bgLogo7 from "@/assets/bg-logo-7.jpg";
 
 interface Product {
   id: string;
@@ -110,7 +113,12 @@ const Products = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8">
+      <div 
+        className="min-h-screen bg-cover bg-center bg-fixed"
+        style={{ backgroundImage: `url(${bgLogo5}), url(${bgLogo6}), url(${bgLogo7})`, backgroundBlendMode: 'overlay' }}
+      >
+        <div className="bg-background/90 backdrop-blur-sm">
+          <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-bold text-primary">Our Collection</h1>
           {getCartCount() > 0 && (
@@ -175,6 +183,8 @@ const Products = () => {
             <p className="text-xl text-muted-foreground">No products found</p>
           </div>
         )}
+          </div>
+        </div>
       </div>
     </Layout>
   );
