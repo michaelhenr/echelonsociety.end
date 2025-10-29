@@ -1,6 +1,12 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.jpg";
 import bgImage from "@/assets/bg-logo-1.jpg";
 
@@ -10,6 +16,42 @@ import bgImage from "@/assets/bg-logo-1.jpg";
  */
 const RoleSelection = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [showNameDialog, setShowNameDialog] = useState(false);
+  const [clientName, setClientName] = useState("");
+
+  const handleClientEntry = async () => {
+    if (!clientName.trim()) {
+      toast({
+        title: "Name Required",
+        description: "Please enter your name",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("client_entries")
+        .insert([{ name: clientName.trim() }]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Welcome!",
+        description: `Welcome to Echelon, ${clientName}!`,
+      });
+
+      setShowNameDialog(false);
+      navigate("/home");
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div 
@@ -34,7 +76,7 @@ const RoleSelection = () => {
 
         {/* Role Cards */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-          <Card className="hover:shadow-xl transition-shadow cursor-pointer bg-card/95 backdrop-blur" onClick={() => navigate("/home")}>
+          <Card className="hover:shadow-xl transition-shadow cursor-pointer bg-card/95 backdrop-blur" onClick={() => setShowNameDialog(true)}>
             <CardHeader>
               <CardTitle className="text-primary">Client</CardTitle>
               <CardDescription>
@@ -89,6 +131,38 @@ const RoleSelection = () => {
           </p>
         </div>
       </div>
+
+      {/* Client Name Dialog */}
+      <Dialog open={showNameDialog} onOpenChange={setShowNameDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Welcome to Echelon</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-muted-foreground">Can you write your name?</p>
+            <div>
+              <Label htmlFor="client-name">Your Name</Label>
+              <Input
+                id="client-name"
+                value={clientName}
+                onChange={(e) => setClientName(e.target.value)}
+                placeholder="Enter your name"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleClientEntry();
+                  }
+                }}
+              />
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setShowNameDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleClientEntry}>Continue</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

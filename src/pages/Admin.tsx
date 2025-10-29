@@ -16,11 +16,12 @@ import bgLogo6 from "@/assets/bg-logo-6.jpg";
 
 const Admin = () => {
   const { toast } = useToast();
-  const [stats, setStats] = useState({ brands: 0, products: 0, orders: 0, ads: 0 });
+  const [stats, setStats] = useState({ brands: 0, products: 0, orders: 0, ads: 0, clientEntries: 0 });
   const [orders, setOrders] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
   const [ads, setAds] = useState<any[]>([]);
+  const [clientEntries, setClientEntries] = useState<any[]>([]);
   const [editingProduct, setEditingProduct] = useState<any | null>(null);
   const [editForm, setEditForm] = useState({
     name: "",
@@ -65,23 +66,26 @@ const Admin = () => {
   };
 
   const fetchData = async () => {
-    const [brandsRes, productsRes, ordersRes, adsRes] = await Promise.all([
+    const [brandsRes, productsRes, ordersRes, adsRes, clientEntriesRes] = await Promise.all([
       supabase.from("brands").select("*"),
       supabase.from("products").select("*, brands(name)"),
       supabase.from("orders").select("*, order_items(*, products(name))"),
       supabase.from("ads").select("*"),
+      supabase.from("client_entries").select("*").order("created_at", { ascending: false }),
     ]);
 
     if (brandsRes.data) setBrands(brandsRes.data);
     if (productsRes.data) setProducts(productsRes.data);
     if (ordersRes.data) setOrders(ordersRes.data);
     if (adsRes.data) setAds(adsRes.data);
+    if (clientEntriesRes.data) setClientEntries(clientEntriesRes.data);
 
     setStats({
       brands: brandsRes.data?.length || 0,
       products: productsRes.data?.length || 0,
       orders: ordersRes.data?.length || 0,
       ads: adsRes.data?.length || 0,
+      clientEntries: clientEntriesRes.data?.length || 0,
     });
   };
 
@@ -187,7 +191,15 @@ const Admin = () => {
           <div className="container mx-auto px-4 py-8">
         <h1 className="text-4xl font-bold text-primary mb-8">Admin Dashboard</h1>
 
-        <div className="grid md:grid-cols-4 gap-6 mb-8">
+        <div className="grid md:grid-cols-5 gap-6 mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Client Entries</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold">{stats.clientEntries}</p>
+            </CardContent>
+          </Card>
           <Card>
             <CardHeader>
               <CardTitle>Brands</CardTitle>
@@ -222,13 +234,49 @@ const Admin = () => {
           </Card>
         </div>
 
-        <Tabs defaultValue="orders">
+        <Tabs defaultValue="clients">
           <TabsList>
+            <TabsTrigger value="clients">Client Entries</TabsTrigger>
             <TabsTrigger value="orders">Orders</TabsTrigger>
             <TabsTrigger value="products">Products</TabsTrigger>
             <TabsTrigger value="brands">Brands</TabsTrigger>
             <TabsTrigger value="ads">Ads</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="clients">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Client Entries</CardTitle>
+                <Button onClick={() => exportToExcel(clientEntries, "client-entries")}>Export to Excel</Button>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Entry Date</TableHead>
+                      <TableHead>Orders</TableHead>
+                      <TableHead>Newsletter</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {clientEntries.map((entry) => {
+                      const clientOrders = orders.filter(o => o.client_name === entry.name);
+                      const hasNewsletter = entry.email ? "✓" : "-";
+                      return (
+                        <TableRow key={entry.id}>
+                          <TableCell className="font-medium">{entry.name}</TableCell>
+                          <TableCell>{new Date(entry.created_at).toLocaleDateString()}</TableCell>
+                          <TableCell>{clientOrders.length} order(s)</TableCell>
+                          <TableCell>{hasNewsletter}</TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="orders">
             <Card>
