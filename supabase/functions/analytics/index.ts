@@ -22,15 +22,19 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
-        },
-      }
-    );
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+
+    if (!supabaseUrl || !supabaseServiceRoleKey) {
+      console.error('[Analytics] Missing Supabase environment variables');
+      return new Response(JSON.stringify({ error: 'Server configuration error' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      });
+    }
+
+    // Use service role key to query all analytics data (admin-only)
+    const supabaseClient = createClient(supabaseUrl, supabaseServiceRoleKey);
 
     // GET DASHBOARD STATISTICS
     if (req.method === 'GET') {
