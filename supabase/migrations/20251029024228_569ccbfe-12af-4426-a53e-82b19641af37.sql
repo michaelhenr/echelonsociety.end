@@ -6,20 +6,9 @@ CREATE TABLE public.client_entries (
   created_at timestamp with time zone NOT NULL DEFAULT now()
 );
 
--- Enable Row Level Security
-ALTER TABLE public.client_entries ENABLE ROW LEVEL SECURITY;
-
--- Everyone (authenticated or not) can insert client entries
-CREATE POLICY "Anyone can insert client entries"
-ON public.client_entries
-FOR INSERT
-WITH CHECK (true);
-
--- Everyone can view all client entries
-CREATE POLICY "Everyone can view client entries"
-ON public.client_entries
-FOR SELECT
-USING (true);
+-- Temporarily DISABLE Row Level Security to allow unauthenticated access
+-- (Can be re-enabled later with proper policies if needed)
+-- ALTER TABLE public.client_entries ENABLE ROW LEVEL SECURITY;
 
 -- Create index for faster lookups
 CREATE INDEX idx_client_entries_name ON public.client_entries(name);

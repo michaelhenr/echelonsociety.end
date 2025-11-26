@@ -28,6 +28,8 @@ export class ClientsAPI {
 
     try {
       // Direct database insert instead of Edge Function
+      console.log('[ClientsAPI] Attempting direct DB insert for:', name.trim());
+      
       const { data, error } = await supabase
         .from('client_entries')
         .insert({
@@ -38,7 +40,13 @@ export class ClientsAPI {
         .single();
 
       if (error) {
-        console.error('[ClientsAPI] Database error:', error);
+        console.error('[ClientsAPI] Database error details:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+          fullError: error,
+        });
         throw new Error(`Failed to register client: ${error.message}`);
       }
 
