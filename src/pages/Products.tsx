@@ -32,6 +32,7 @@ const Products = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [brandFilter, setBrandFilter] = useState("all");
+  const [brands, setBrands] = useState<string[]>([]);
   const [cart, setCart] = useState<Map<string, number>>(new Map());
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -57,6 +58,10 @@ const Products = () => {
 
       setProducts(productsWithImages);
       setFilteredProducts(productsWithImages);
+
+      // Extract unique brand names
+      const uniqueBrands = Array.from(new Set(data.map((p: any) => p.brands?.name).filter(Boolean)));
+      setBrands(uniqueBrands);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -144,7 +149,9 @@ const Products = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Brands</SelectItem>
-              <SelectItem value="Echelon Society">Echelon Society</SelectItem>
+              {brands.map((brand) => (
+                <SelectItem key={brand} value={brand}>{brand}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

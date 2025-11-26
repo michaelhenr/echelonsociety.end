@@ -21,6 +21,10 @@ const Checkout = () => {
     phone: "",
     address: "",
     city: "",
+    paymentMethod: "cash",
+    cardNumber: "",
+    cardExpiry: "",
+    cardCVV: "",
   });
 
   const calculateTotal = () => {
@@ -65,6 +69,26 @@ const Checkout = () => {
         };
       });
 
+      // Validate payment method
+      if (formData.paymentMethod === "visa") {
+        if (!formData.cardNumber || !formData.cardExpiry || !formData.cardCVV) {
+          toast({
+            title: "Error",
+            description: "Please fill in all card details",
+            variant: "destructive",
+          });
+          return;
+        }
+        if (formData.cardNumber.length !== 16) {
+          toast({
+            title: "Error",
+            description: "Card number must be 16 digits",
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+
       // Create order using backend API (automatically calculates shipping and total)
       const orderResponse = await OrdersAPI.create({
         client_name: formData.name,
@@ -72,6 +96,8 @@ const Checkout = () => {
         client_phone: formData.phone,
         client_address: formData.address,
         client_city: formData.city,
+        payment_method: formData.paymentMethod,
+        card_last_four: formData.paymentMethod === "visa" ? formData.cardNumber.slice(-4) : null,
         items,
       });
 
@@ -154,6 +180,93 @@ const Checkout = () => {
                 <SelectItem value="Other">Other City</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="border-t pt-6 space-y-4">
+            <Label>Payment Method</Label>
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  id="cash"
+                  name="paymentMethod"
+                  value="cash"
+                  checked={formData.paymentMethod === "cash"}
+                  onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
+                  className="h-4 w-4"
+                />
+                <Label htmlFor="cash" className="font-normal cursor-pointer">
+                  Cash on Delivery
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  id="visa"
+                  name="paymentMethod"
+                  value="visa"
+                  checked={formData.paymentMethod === "visa"}
+                  onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
+                  className="h-4 w-4"
+                />
+                <Label htmlFor="visa" className="font-normal cursor-pointer">
+                  Visa Card
+                </Label>
+              </div>
+            </div>
+
+            {formData.paymentMethod === "visa" && (
+              <div className="space-y-4 mt-4 p-4 border rounded-lg bg-muted/50">
+                <div>
+                  <Label htmlFor="cardNumber">Card Number</Label>
+                  <Input
+                    id="cardNumber"
+                    placeholder="1234 5678 9012 3456"
+                    value={formData.cardNumber}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '').slice(0, 16);
+                      setFormData({ ...formData, cardNumber: value });
+                    }}
+                    maxLength={16}
+                    required={formData.paymentMethod === "visa"}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="cardExpiry">Expiry (MM/YY)</Label>
+                    <Input
+                      id="cardExpiry"
+                      placeholder="12/25"
+                      value={formData.cardExpiry}
+                      onChange={(e) => {
+                        let value = e.target.value.replace(/\D/g, '');
+                        if (value.length >= 2) {
+                          value = value.slice(0, 2) + '/' + value.slice(2, 4);
+                        }
+                        setFormData({ ...formData, cardExpiry: value });
+                      }}
+                      maxLength={5}
+                      required={formData.paymentMethod === "visa"}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="cardCVV">CVV</Label>
+                    <Input
+                      id="cardCVV"
+                      placeholder="123"
+                      type="password"
+                      value={formData.cardCVV}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, '').slice(0, 3);
+                        setFormData({ ...formData, cardCVV: value });
+                      }}
+                      maxLength={3}
+                      required={formData.paymentMethod === "visa"}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="border-t pt-6">

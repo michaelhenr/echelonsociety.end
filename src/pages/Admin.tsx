@@ -64,6 +64,13 @@ const Admin = () => {
         description: "You don't have admin permissions",
         variant: "destructive",
       });
+    } else {
+      // Success! Show green confirmation with admin name
+      toast({
+        title: "✓ Access Confirmed",
+        description: `Welcome, Admin ${user.email}`,
+        className: "bg-green-500 text-white",
+      });
     }
   };
 
