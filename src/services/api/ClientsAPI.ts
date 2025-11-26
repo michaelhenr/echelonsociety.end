@@ -15,6 +15,10 @@ export class ClientsAPI {
   static async register(name: string, email?: string) {
     if (!name) throw new Error('Client name is required');
 
+    if (name.trim().length < 2) {
+      throw new Error('Name must be at least 2 characters long');
+    }
+
     if (email) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
@@ -22,13 +26,27 @@ export class ClientsAPI {
       }
     }
 
-    const { data, error } = await supabase.functions.invoke('clients', {
-      body: { name, email },
-      method: 'POST',
-    });
+    try {
+      const { data, error } = await supabase.functions.invoke('clients', {
+        body: { name: name.trim(), email: email?.trim() || null },
+        method: 'POST',
+      });
 
-    if (error) throw new Error(`Failed to register client: ${error.message}`);
-    return data;
+      if (error) {
+        console.error('[ClientsAPI] Error response:', error);
+        throw new Error(`Failed to register client: ${error.message}`);
+      }
+
+      if (!data) {
+        throw new Error('No response data from server');
+      }
+
+      console.log('[ClientsAPI] Client registered successfully:', data);
+      return data;
+    } catch (err: any) {
+      console.error('[ClientsAPI] Registration failed:', err);
+      throw err;
+    }
   }
 
   /**

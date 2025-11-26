@@ -22,15 +22,22 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
-        },
-      }
-    );
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.error('[Clients] Missing Supabase environment variables');
+      return new Response(JSON.stringify({ error: 'Server configuration error' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      });
+    }
+
+    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: {
+        headers: { Authorization: req.headers.get('Authorization') || '' },
+      },
+    });
 
     // REGISTER CLIENT ENTRY
     if (req.method === 'POST') {
@@ -47,6 +54,8 @@ serve(async (req) => {
         throw new Error('Name must be at least 2 characters long');
       }
 
+      console.log(`[Clients] Attempting to register client: ${trimmedName}`);
+
       const { data, error } = await supabaseClient
         .from('client_entries')
         .insert({
@@ -56,7 +65,10 @@ serve(async (req) => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('[Clients] Database error:', error);
+        throw error;
+      }
 
       console.log(`[Clients] New client entry: ${data.name} (${data.id})`);
 
@@ -116,10 +128,11 @@ serve(async (req) => {
     });
 
   } catch (error: any) {
-    console.error('[Clients] Error:', error.message);
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error('[Clients] Error:', error.message || error);
+    return new Response(JSON.stringify({ error: error.message || 'Internal server error' }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,
     });
   }
 });
+
