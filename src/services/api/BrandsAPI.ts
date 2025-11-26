@@ -20,8 +20,8 @@ export class BrandsAPI {
    * @returns Array of all brands
    */
   static async list() {
-    const { data, error } = await supabase.functions.invoke('brands', {
-      body: { action: 'list' },
+    const { data, error } = await supabase.functions.invoke('brands?action=list', {
+      method: 'GET',
     });
 
     if (error) throw new Error(`Failed to list brands: ${error.message}`);
@@ -36,8 +36,8 @@ export class BrandsAPI {
   static async get(id: string) {
     if (!id) throw new Error('Brand ID is required');
 
-    const { data, error } = await supabase.functions.invoke('brands', {
-      body: { action: 'get', id },
+    const { data, error } = await supabase.functions.invoke(`brands?action=get&id=${id}`, {
+      method: 'GET',
     });
 
     if (error) throw new Error(`Failed to get brand: ${error.message}`);
@@ -90,8 +90,7 @@ export class BrandsAPI {
   static async delete(id: string) {
     if (!id) throw new Error('Brand ID is required');
 
-    const { data, error } = await supabase.functions.invoke('brands', {
-      body: { action: 'delete', id },
+    const { data, error } = await supabase.functions.invoke(`brands?id=${id}`, {
       method: 'DELETE',
     });
 
