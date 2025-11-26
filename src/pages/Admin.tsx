@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +18,7 @@ import { AnalyticsAPI, ProductsAPI, BrandsAPI, AdsAPI } from "@/services/api";
 import { DashboardStats } from "@/types";
 
 const Admin = () => {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [stats, setStats] = useState<DashboardStats>({ brands: 0, products: 0, orders: 0, ads: 0, clientEntries: 0 });
   const [orders, setOrders] = useState<any[]>([]);
@@ -40,37 +42,64 @@ const Admin = () => {
   }, []);
 
   const checkAdminAccess = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      toast({
-        title: "Access Denied",
-        description: "Please log in as admin",
-        variant: "destructive",
-      });
-      return;
-    }
+    try {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !user) {
+        toast({
+          title: "Access Denied",
+          description: "Please log in as admin",
+          variant: "destructive",
+        });
+        // Redirect to auth page
+        setTimeout(() => navigate("/auth"), 2000);
+        return false;
+      }
 
-    const { data } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .eq("role", "admin")
-      .single();
+      // Check for admin role
+      const { data: roleData, error: roleError } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "admin")
+        .maybeSingle();
 
-    if (!data) {
-      toast({
-        title: "Access Denied",
-        description: "You don't have admin permissions",
-        variant: "destructive",
-      });
-    } else {
+      if (roleError) {
+        console.error("[Admin] Error checking role:", roleError);
+        toast({
+          title: "Access Denied",
+          description: "Error verifying admin permissions",
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      if (!roleData) {
+        toast({
+          title: "Access Denied",
+          description: "You don't have admin permissions. Contact system administrator.",
+          variant: "destructive",
+        });
+        return false;
+      }
+
       // Success! Show green confirmation with admin name
+      const adminName = user.user_metadata?.name || user.email?.split('@')[0] || 'Admin';
       toast({
         title: "✓ Access Confirmed",
-        description: `Welcome, Admin ${user.email}`,
-        className: "bg-green-500 text-white",
+        description: `Welcome Admin, ${adminName}`,
+        className: "bg-green-600 text-white border-green-700",
       });
+      
+      return true;
+    } catch (error: any) {
+      console.error("[Admin] Access check error:", error);
+      toast({
+        title: "Access Denied",
+        description: error.message || "Failed to verify admin access",
+        variant: "destructive",
+      });
+      return false;
     }
   };
 
