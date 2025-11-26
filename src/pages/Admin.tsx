@@ -302,6 +302,7 @@ const Admin = () => {
                       <TableHead>Phone</TableHead>
                       <TableHead>City</TableHead>
                       <TableHead>Total</TableHead>
+                      <TableHead>Payment</TableHead>
                       <TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -313,6 +314,11 @@ const Admin = () => {
                         <TableCell>{order.client_phone}</TableCell>
                         <TableCell>{order.client_city}</TableCell>
                         <TableCell>{order.total_amount} EGP</TableCell>
+                        <TableCell>
+                          {order.payment_method === 'visa' 
+                            ? `Visa (****${order.card_last_four})` 
+                            : 'Cash on Delivery'}
+                        </TableCell>
                         <TableCell>{order.status}</TableCell>
                       </TableRow>
                     ))}

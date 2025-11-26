@@ -166,6 +166,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          card_last_four: string | null
           client_address: string
           client_city: string
           client_email: string
@@ -173,12 +174,14 @@ export type Database = {
           client_phone: string
           created_at: string | null
           id: string
+          payment_method: string | null
           shipping_cost: number
           status: string | null
           total_amount: number
           updated_at: string | null
         }
         Insert: {
+          card_last_four?: string | null
           client_address: string
           client_city: string
           client_email: string
@@ -186,12 +189,14 @@ export type Database = {
           client_phone: string
           created_at?: string | null
           id?: string
+          payment_method?: string | null
           shipping_cost: number
           status?: string | null
           total_amount: number
           updated_at?: string | null
         }
         Update: {
+          card_last_four?: string | null
           client_address?: string
           client_city?: string
           client_email?: string
@@ -199,6 +204,7 @@ export type Database = {
           client_phone?: string
           created_at?: string | null
           id?: string
+          payment_method?: string | null
           shipping_cost?: number
           status?: string | null
           total_amount?: number

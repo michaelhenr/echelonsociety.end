@@ -60,7 +60,9 @@ const Products = () => {
       setFilteredProducts(productsWithImages);
 
       // Extract unique brand names
-      const uniqueBrands = Array.from(new Set(data.map((p: any) => p.brands?.name).filter(Boolean)));
+      const uniqueBrands = Array.from(
+        new Set(data.map((p: any) => p.brands?.name).filter(Boolean))
+      ) as string[];
       setBrands(uniqueBrands);
     } catch (error: any) {
       toast({

@@ -54,26 +54,33 @@ supabase/functions/
    - Alexandria & Cairo: 70 EGP
    - Other cities: 100 EGP
 
-2. **Order Workflow**
+2. **Payment Methods**
+   - Cash on Delivery (default)
+   - Visa Card (with secure card detail collection)
+   - Card validation (16-digit number, expiry, CVV)
+
+3. **Order Workflow**
    - pending → confirmed → shipped → delivered
 
-3. **Newsletter Discount**
+4. **Newsletter Discount**
    - 10% discount code (ECHELON10) for subscribers
 
-4. **Input Validation**
+5. **Input Validation**
    - Email format validation
    - Price validation (positive numbers)
    - Date range validation
+   - Card number validation (16 digits)
    - Duplicate checking
 
 ## Key Features
 
 - **Multi-Role Platform**: Client browsing, advertiser submissions, brand management, and admin oversight
-- **Product Catalog**: Premium fashion items with advanced filtering and search
+- **Product Catalog**: Premium fashion items with advanced filtering and search by brand and category
+- **Payment Options**: Cash on Delivery or Visa card payment with secure validation
 - **Secure Checkout**: Location-based shipping (Cairo/Alexandria: 70 EGP, Other: 100 EGP)
 - **Newsletter**: 10% discount code (ECHELON10) for subscribers
 - **AI Assistant**: Built-in chatbot using Lovable AI Gateway (Gemini 2.5 Flash)
-- **Admin Dashboard**: Comprehensive analytics, order management, and Excel export
+- **Admin Dashboard**: Comprehensive analytics, order management with payment details, and Excel export
 - **Client Tracking**: Entry tracking with name, orders, and newsletter status
 
 ## Setup Instructions

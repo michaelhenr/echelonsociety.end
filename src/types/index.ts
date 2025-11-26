@@ -39,6 +39,8 @@ export interface Order {
   shipping_cost: number;
   total_amount: number;
   status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
+  payment_method?: string;
+  card_last_four?: string | null;
   created_at: string;
   updated_at: string;
 }
