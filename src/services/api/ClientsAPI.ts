@@ -27,45 +27,34 @@ export class ClientsAPI {
     }
 
     try {
-      // Direct database insert instead of Edge Function
-      console.log('[ClientsAPI] Attempting direct DB insert for:', name.trim());
-      
-      const { data, error } = await supabase
-        .from('client_entries')
-        .insert({
+      const { data, error } = await supabase.functions.invoke('clients', {
+        body: {
           name: name.trim(),
           email: email?.trim() || null,
-        })
-        .select()
-        .single();
+        },
+        method: 'POST',
+      });
 
       if (error) {
-        console.error('[ClientsAPI] Database error details:', {
-          message: error.message,
-          code: error.code,
-          details: error.details,
-          hint: error.hint,
-          fullError: error,
-        });
+        console.error('[ClientsAPI] Edge function error:', error);
         throw new Error(`Failed to register client: ${error.message}`);
       }
 
-      if (!data) {
+      if (!data || !data.client) {
         throw new Error('No response data from server');
       }
 
-      console.log('[ClientsAPI] Client registered successfully:', data);
-      return {
-        success: true,
-        message: `Welcome ${data.name}!`,
-        client: data,
+      console.log('[ClientsAPI] Client registered successfully via edge function:', data.client);
+      return data as {
+        success: boolean;
+        message: string;
+        client: any;
       };
     } catch (err: any) {
       console.error('[ClientsAPI] Registration failed:', err);
-      throw err;
+      throw new Error(err.message || 'Failed to register client');
     }
   }
-
   /**
    * List all client entries (Admin only)
    * @returns Array of client entries
