@@ -102,14 +102,12 @@ serve(async (req) => {
       console.log('[Analytics] Generated dashboard statistics');
 
       return new Response(JSON.stringify({
-        stats: {
-          brands: brandsCount || 0,
-          products: productsCount || 0,
-          orders: ordersCount || 0,
-          ads: adsCount || 0,
-          clients: clientsCount || 0,
-          total_revenue: totalRevenue,
-        },
+        brands: brandsCount || 0,
+        products: productsCount || 0,
+        orders: ordersCount || 0,
+        ads: adsCount || 0,
+        clientEntries: clientsCount || 0,
+        total_revenue: totalRevenue,
         order_status_breakdown: statusBreakdown,
         recent_orders: recentOrders,
       }), {
