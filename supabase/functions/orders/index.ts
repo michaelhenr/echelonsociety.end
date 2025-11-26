@@ -41,7 +41,16 @@ serve(async (req) => {
 
     // CREATE ORDER
     if (req.method === 'POST' && action === 'create') {
-      const { client_name, client_email, client_phone, client_address, client_city, items } = await req.json();
+      const { 
+        client_name, 
+        client_email, 
+        client_phone, 
+        client_address, 
+        client_city, 
+        payment_method,
+        card_last_four,
+        items 
+      } = await req.json();
 
       // Validation
       if (!client_name || !client_email || !client_phone || !client_address || !client_city) {
