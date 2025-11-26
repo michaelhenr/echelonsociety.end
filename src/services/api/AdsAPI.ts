@@ -21,8 +21,12 @@ export class AdsAPI {
    * @returns Array of ads
    */
   static async list(activeOnly = false) {
-    const { data, error } = await supabase.functions.invoke('ads', {
-      body: { action: 'list', active_only: activeOnly },
+    const params = new URLSearchParams();
+    params.append('action', 'list');
+    if (activeOnly) params.append('active_only', 'true');
+
+    const { data, error } = await supabase.functions.invoke(`ads?${params.toString()}`, {
+      method: 'GET',
     });
 
     if (error) throw new Error(`Failed to list ads: ${error.message}`);
@@ -72,8 +76,7 @@ export class AdsAPI {
   static async delete(id: string) {
     if (!id) throw new Error('Ad ID is required');
 
-    const { data, error } = await supabase.functions.invoke('ads', {
-      body: { action: 'delete', id },
+    const { data, error } = await supabase.functions.invoke(`ads?id=${id}`, {
       method: 'DELETE',
     });
 
