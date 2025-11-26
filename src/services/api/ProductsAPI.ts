@@ -36,8 +36,7 @@ export class ProductsAPI {
     if (filters?.brand_id) params.append('brand_id', filters.brand_id);
     if (filters?.in_stock !== undefined) params.append('in_stock', String(filters.in_stock));
 
-    const { data, error } = await supabase.functions.invoke('products', {
-      body: null,
+    const { data, error } = await supabase.functions.invoke(`products?${params.toString()}`, {
       method: 'GET',
     });
 
@@ -53,8 +52,8 @@ export class ProductsAPI {
   static async get(id: string) {
     if (!id) throw new Error('Product ID is required');
 
-    const { data, error } = await supabase.functions.invoke('products', {
-      body: { action: 'get', id },
+    const { data, error } = await supabase.functions.invoke(`products?action=get&id=${id}`, {
+      method: 'GET',
     });
 
     if (error) throw new Error(`Failed to get product: ${error.message}`);
@@ -114,8 +113,7 @@ export class ProductsAPI {
   static async delete(id: string) {
     if (!id) throw new Error('Product ID is required');
 
-    const { data, error } = await supabase.functions.invoke('products', {
-      body: { action: 'delete', id },
+    const { data, error } = await supabase.functions.invoke(`products?id=${id}`, {
       method: 'DELETE',
     });
 
