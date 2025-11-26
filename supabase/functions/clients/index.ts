@@ -33,19 +33,31 @@ serve(async (req) => {
       });
     }
 
+    // Create client WITHOUT requiring Authorization header (for unauthenticated users)
     const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
       global: {
-        headers: { Authorization: req.headers.get('Authorization') || '' },
+        headers: {},
       },
     });
 
     // REGISTER CLIENT ENTRY
     if (req.method === 'POST') {
-      const { name, email } = await req.json();
+      let body;
+      try {
+        body = await req.json();
+      } catch (e) {
+        console.error('[Clients] Failed to parse JSON body:', e);
+        return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400,
+        });
+      }
+
+      const { name, email } = body;
 
       // Validation
-      if (!name) {
-        throw new Error('Name is required');
+      if (!name || typeof name !== 'string') {
+        throw new Error('Name is required and must be a string');
       }
 
       // Trim and validate name
@@ -60,17 +72,17 @@ serve(async (req) => {
         .from('client_entries')
         .insert({
           name: trimmedName,
-          email: email || null,
+          email: email && typeof email === 'string' ? email.trim() : null,
         })
         .select()
         .single();
 
       if (error) {
         console.error('[Clients] Database error:', error);
-        throw error;
+        throw new Error(`Database error: ${error.message}`);
       }
 
-      console.log(`[Clients] New client entry: ${data.name} (${data.id})`);
+      console.log(`[Clients] New client entry created: ${data.name} (${data.id})`);
 
       return new Response(JSON.stringify({
         success: true,
@@ -89,7 +101,10 @@ serve(async (req) => {
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (clientsError) throw clientsError;
+      if (clientsError) {
+        console.error('[Clients] Error fetching clients:', clientsError);
+        throw clientsError;
+      }
 
       // For each client, get order count and newsletter status
       const enrichedClients = await Promise.all(
@@ -128,7 +143,7 @@ serve(async (req) => {
     });
 
   } catch (error: any) {
-    console.error('[Clients] Error:', error.message || error);
+    console.error('[Clients] Error:', error.message || String(error));
     return new Response(JSON.stringify({ error: error.message || 'Internal server error' }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,

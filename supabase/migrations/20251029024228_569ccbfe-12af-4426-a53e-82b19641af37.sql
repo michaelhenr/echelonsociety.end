@@ -9,17 +9,17 @@ CREATE TABLE public.client_entries (
 -- Enable Row Level Security
 ALTER TABLE public.client_entries ENABLE ROW LEVEL SECURITY;
 
--- Everyone can create client entries
-CREATE POLICY "Everyone can create client entries"
+-- Everyone (authenticated or not) can insert client entries
+CREATE POLICY "Anyone can insert client entries"
 ON public.client_entries
 FOR INSERT
 WITH CHECK (true);
 
--- Admins can view all client entries
-CREATE POLICY "Admins can view client entries"
+-- Everyone can view all client entries
+CREATE POLICY "Everyone can view client entries"
 ON public.client_entries
 FOR SELECT
-USING (has_role(auth.uid(), 'admin'::app_role));
+USING (true);
 
 -- Create index for faster lookups
 CREATE INDEX idx_client_entries_name ON public.client_entries(name);
