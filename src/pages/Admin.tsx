@@ -13,10 +13,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import * as XLSX from "xlsx";
 import bgLogo6 from "@/assets/bg-logo-6.jpg";
+import { AnalyticsAPI, ProductsAPI, BrandsAPI, AdsAPI } from "@/services/api";
+import { DashboardStats } from "@/types";
 
 const Admin = () => {
   const { toast } = useToast();
-  const [stats, setStats] = useState({ brands: 0, products: 0, orders: 0, ads: 0, clientEntries: 0 });
+  const [stats, setStats] = useState<DashboardStats>({ brands: 0, products: 0, orders: 0, ads: 0, clientEntries: 0 });
   const [orders, setOrders] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
@@ -66,27 +68,32 @@ const Admin = () => {
   };
 
   const fetchData = async () => {
-    const [brandsRes, productsRes, ordersRes, adsRes, clientEntriesRes] = await Promise.all([
-      supabase.from("brands").select("*"),
-      supabase.from("products").select("*, brands(name)"),
-      supabase.from("orders").select("*, order_items(*, products(name))"),
-      supabase.from("ads").select("*"),
-      supabase.from("client_entries").select("*").order("created_at", { ascending: false }),
-    ]);
+    try {
+      // Use Analytics API for dashboard stats
+      const statsData = await AnalyticsAPI.getDashboardStats();
+      setStats(statsData);
 
-    if (brandsRes.data) setBrands(brandsRes.data);
-    if (productsRes.data) setProducts(productsRes.data);
-    if (ordersRes.data) setOrders(ordersRes.data);
-    if (adsRes.data) setAds(adsRes.data);
-    if (clientEntriesRes.data) setClientEntries(clientEntriesRes.data);
+      // Fetch detailed data using direct queries for tables
+      const [brandsRes, productsRes, ordersRes, adsRes, clientEntriesRes] = await Promise.all([
+        supabase.from("brands").select("*"),
+        supabase.from("products").select("*, brands(name)"),
+        supabase.from("orders").select("*, order_items(*, products(name))"),
+        supabase.from("ads").select("*"),
+        supabase.from("client_entries").select("*").order("created_at", { ascending: false }),
+      ]);
 
-    setStats({
-      brands: brandsRes.data?.length || 0,
-      products: productsRes.data?.length || 0,
-      orders: ordersRes.data?.length || 0,
-      ads: adsRes.data?.length || 0,
-      clientEntries: clientEntriesRes.data?.length || 0,
-    });
+      if (brandsRes.data) setBrands(brandsRes.data);
+      if (productsRes.data) setProducts(productsRes.data);
+      if (ordersRes.data) setOrders(ordersRes.data);
+      if (adsRes.data) setAds(adsRes.data);
+      if (clientEntriesRes.data) setClientEntries(clientEntriesRes.data);
+    } catch (error: any) {
+      toast({
+        title: "Error loading data",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   const exportToExcel = (data: any[], filename: string) => {
@@ -97,32 +104,32 @@ const Admin = () => {
   };
 
   const deleteProduct = async (id: string) => {
-    const { error } = await supabase.from("products").delete().eq("id", id);
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
+    try {
+      await ProductsAPI.delete(id);
       toast({ title: "Success", description: "Product deleted" });
       fetchData();
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     }
   };
 
   const deleteBrand = async (id: string) => {
-    const { error } = await supabase.from("brands").delete().eq("id", id);
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
+    try {
+      await BrandsAPI.delete(id);
       toast({ title: "Success", description: "Brand deleted" });
       fetchData();
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     }
   };
 
   const deleteAd = async (id: string) => {
-    const { error } = await supabase.from("ads").delete().eq("id", id);
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
+    try {
+      await AdsAPI.delete(id);
       toast({ title: "Success", description: "Ad deleted" });
       fetchData();
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     }
   };
 
@@ -151,19 +158,14 @@ const Admin = () => {
     }
 
     try {
-      const { error } = await supabase
-        .from("products")
-        .update({
-          name: editForm.name,
-          description: editForm.description,
-          price: parseFloat(editForm.price),
-          category: editForm.category,
-          brand_id: editForm.brandId,
-          image_url: editForm.imageUrl,
-        })
-        .eq("id", editingProduct.id);
-
-      if (error) throw error;
+      await ProductsAPI.update(editingProduct.id, {
+        name: editForm.name,
+        description: editForm.description,
+        price: parseFloat(editForm.price),
+        category: editForm.category,
+        brand_id: editForm.brandId,
+        image_url: editForm.imageUrl,
+      });
 
       toast({
         title: "Success!",

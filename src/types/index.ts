@@ -94,6 +94,6 @@ export interface DashboardStats {
   products: number;
   orders: number;
   ads: number;
-  clients: number;
-  total_revenue: number;
+  clientEntries: number;
+  total_revenue?: number;
 }
