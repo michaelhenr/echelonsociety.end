@@ -23,9 +23,9 @@ serve(async (req) => {
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+    const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-    if (!supabaseUrl || !supabaseAnonKey) {
+    if (!supabaseUrl || !supabaseServiceRoleKey) {
       console.error('[Clients] Missing Supabase environment variables');
       return new Response(JSON.stringify({ error: 'Server configuration error' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -33,12 +33,8 @@ serve(async (req) => {
       });
     }
 
-    // Create client WITHOUT requiring Authorization header (for unauthenticated users)
-    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
-      global: {
-        headers: {},
-      },
-    });
+    // Use service role key so this backend function can bypass RLS safely
+    const supabaseClient = createClient(supabaseUrl, supabaseServiceRoleKey);
 
     // REGISTER CLIENT ENTRY
     if (req.method === 'POST') {
