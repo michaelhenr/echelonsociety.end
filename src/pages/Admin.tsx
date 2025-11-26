@@ -37,8 +37,13 @@ const Admin = () => {
   });
 
   useEffect(() => {
-    checkAdminAccess();
-    fetchData();
+    const init = async () => {
+      const isAdmin = await checkAdminAccess();
+      if (isAdmin) {
+        await fetchData();
+      }
+    };
+    init();
   }, []);
 
   const checkAdminAccess = async () => {
