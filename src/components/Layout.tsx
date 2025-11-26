@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { NewsletterAPI } from "@/services/api";
 import { ChatBot } from "@/components/ChatBot";
 import logo from "@/assets/logo.jpg";
 
@@ -68,15 +68,11 @@ export const Layout = ({ children, showNav = true }: LayoutProps) => {
     }
 
     try {
-      const { error } = await supabase
-        .from("newsletter_subscribers")
-        .insert({ email });
-
-      if (error) throw error;
+      const response = await NewsletterAPI.subscribe(email);
 
       toast({
         title: "Success!",
-        description: "You'll receive 10% off your next order!",
+        description: response.message || "You'll receive 10% off your next order!",
       });
       setEmail("");
     } catch (error: any) {

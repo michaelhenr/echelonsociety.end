@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { OrdersAPI } from "@/services/api";
 import { useNavigate, useLocation } from "react-router-dom";
 import bgLogo5 from "@/assets/bg-logo-5.jpg";
 
@@ -54,49 +54,30 @@ const Checkout = () => {
       return;
     }
 
-    const subtotal = calculateTotal();
-    const shipping = calculateShipping();
-    const total = subtotal + shipping;
-
     try {
-      // Create order
-      const { data: order, error: orderError } = await supabase
-        .from("orders")
-        .insert({
-          client_name: formData.name,
-          client_email: formData.email,
-          client_phone: formData.phone,
-          client_address: formData.address,
-          client_city: formData.city,
-          total_amount: total,
-          shipping_cost: shipping,
-          status: "pending",
-        })
-        .select()
-        .single();
-
-      if (orderError) throw orderError;
-
-      // Create order items
-      const orderItems = Array.from(cart.entries()).map(([productId, quantity]) => {
+      // Prepare order items
+      const items = Array.from(cart.entries()).map(([productId, quantity]) => {
         const product = products.find((p: any) => p.id === productId);
         return {
-          order_id: order.id,
           product_id: productId,
           quantity,
-          price: product.price,
+          price: product?.price || 0,
         };
       });
 
-      const { error: itemsError } = await supabase
-        .from("order_items")
-        .insert(orderItems);
-
-      if (itemsError) throw itemsError;
+      // Create order using backend API (automatically calculates shipping and total)
+      const orderResponse = await OrdersAPI.create({
+        client_name: formData.name,
+        client_email: formData.email,
+        client_phone: formData.phone,
+        client_address: formData.address,
+        client_city: formData.city,
+        items,
+      });
 
       toast({
         title: "Order Placed Successfully!",
-        description: "We'll contact you soon to confirm delivery.",
+        description: `Total: ${orderResponse.total} EGP. We'll contact you soon!`,
       });
 
       navigate("/products");
