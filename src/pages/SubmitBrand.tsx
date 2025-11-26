@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,12 +12,26 @@ import bgLogo8 from "@/assets/bg-logo-8.jpg";
 const SubmitBrand = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [existingBrands, setExistingBrands] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     email: "",
     phone: "",
   });
+
+  useEffect(() => {
+    const loadBrands = async () => {
+      try {
+        const brands = await BrandsAPI.list();
+        setExistingBrands(brands.map((b: any) => b.name.toLowerCase()));
+      } catch (error) {
+        console.error("Failed to load brands:", error);
+      }
+    };
+    loadBrands();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,6 +45,16 @@ const SubmitBrand = () => {
       return;
     }
 
+    if (existingBrands.includes(formData.name.toLowerCase())) {
+      toast({
+        title: "Brand Already Exists",
+        description: `A brand named "${formData.name}" already exists. Please choose a different name.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
       await BrandsAPI.create({
         name: formData.name,
@@ -44,13 +68,16 @@ const SubmitBrand = () => {
         description: "Your brand has been submitted successfully",
       });
 
-      navigate("/");
+      setFormData({ name: "", description: "", email: "", phone: "" });
+      setTimeout(() => navigate("/"), 1500);
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message,
+        title: "Submission Failed",
+        description: error.message || "Please try again",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -106,7 +133,9 @@ const SubmitBrand = () => {
             />
           </div>
 
-          <Button type="submit" className="w-full">Submit Brand</Button>
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? "Submitting..." : "Submit Brand"}
+          </Button>
         </form>
           </div>
         </div>
