@@ -87,6 +87,8 @@ serve(async (req) => {
           shipping_cost: shippingCost,
           total_amount: totalAmount,
           status: 'pending',
+          payment_method: payment_method || 'cash',
+          card_last_four: card_last_four || null,
         })
         .select()
         .single();

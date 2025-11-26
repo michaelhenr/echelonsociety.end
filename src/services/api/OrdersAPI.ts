@@ -19,6 +19,8 @@ export interface OrderInput {
   client_phone: string;
   client_address: string;
   client_city: string;
+  payment_method?: string;
+  card_last_four?: string | null;
   items: OrderItem[];
 }
 
