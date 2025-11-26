@@ -5,8 +5,20 @@
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export function validateEmail(email: string): boolean {
+/**
+ * Return true/false whether an email is valid
+ */
+export function isValidEmail(email: string): boolean {
   return EMAIL_REGEX.test(email);
+}
+
+/**
+ * Throwing validator for required email fields (keeps existing calling style)
+ */
+export function validateEmail(email: string, fieldName: string = 'Email'): void {
+  if (!isValidEmail(email)) {
+    throw new Error(`${fieldName} format is invalid`);
+  }
 }
 
 export function validatePrice(price: number): boolean {
@@ -28,11 +40,5 @@ export function validateRequired(value: any, fieldName: string): void {
 export function validatePositiveNumber(value: number, fieldName: string): void {
   if (typeof value !== 'number' || value <= 0) {
     throw new Error(`${fieldName} must be a positive number`);
-  }
-}
-
-export function validateEmail(email: string, fieldName: string = 'Email'): void {
-  if (!validateEmail(email)) {
-    throw new Error(`${fieldName} format is invalid`);
   }
 }
