@@ -9,6 +9,7 @@ import About from "./pages/About";
 import Products from "./pages/Products";
 import Checkout from "./pages/Checkout";
 import Admin from "./pages/Admin";
+import Auth from "./pages/Auth";
 import SubmitAd from "./pages/SubmitAd";
 import SubmitBrand from "./pages/SubmitBrand";
 import SubmitProduct from "./pages/SubmitProduct";
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/about" element={<About />} />
           <Route path="/products" element={<Products />} />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/submit-ad" element={<SubmitAd />} />
           <Route path="/submit-brand" element={<SubmitBrand />} />
