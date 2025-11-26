@@ -27,13 +27,18 @@ export class ClientsAPI {
     }
 
     try {
-      const { data, error } = await supabase.functions.invoke('clients', {
-        body: { name: name.trim(), email: email?.trim() || null },
-        method: 'POST',
-      });
+      // Direct database insert instead of Edge Function
+      const { data, error } = await supabase
+        .from('client_entries')
+        .insert({
+          name: name.trim(),
+          email: email?.trim() || null,
+        })
+        .select()
+        .single();
 
       if (error) {
-        console.error('[ClientsAPI] Error response:', error);
+        console.error('[ClientsAPI] Database error:', error);
         throw new Error(`Failed to register client: ${error.message}`);
       }
 
@@ -42,7 +47,11 @@ export class ClientsAPI {
       }
 
       console.log('[ClientsAPI] Client registered successfully:', data);
-      return data;
+      return {
+        success: true,
+        message: `Welcome ${data.name}!`,
+        client: data,
+      };
     } catch (err: any) {
       console.error('[ClientsAPI] Registration failed:', err);
       throw err;
@@ -54,9 +63,17 @@ export class ClientsAPI {
    * @returns Array of client entries
    */
   static async list() {
-    const { data, error } = await supabase.functions.invoke('clients');
+    try {
+      const { data, error } = await supabase
+        .from('client_entries')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    if (error) throw new Error(`Failed to list clients: ${error.message}`);
-    return data.clients;
+      if (error) throw new Error(`Failed to list clients: ${error.message}`);
+      return data || [];
+    } catch (err: any) {
+      console.error('[ClientsAPI] List failed:', err);
+      throw err;
+    }
   }
 }
