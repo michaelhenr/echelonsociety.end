@@ -14,44 +14,17 @@ interface LayoutProps {
 
 /**
  * Layout component providing consistent navigation and structure
- * Includes hidden admin access via logo clicks
  */
 export const Layout = ({ children, showNav = true }: LayoutProps) => {
-  const [logoClicks, setLogoClicks] = useState(0);
-  const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
-  const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
 
   const handleLogoClick = () => {
-    const newClicks = logoClicks + 1;
-    
-    // Single click navigates to home only if not already there
-    if (newClicks === 1 && location.pathname !== "/home") {
+    // Navigate to home only if not already there
+    if (location.pathname !== "/home") {
       navigate("/home");
-    }
-    
-    setLogoClicks(newClicks);
-    
-    if (newClicks === 5) {
-      setShowPasswordPrompt(true);
-      setLogoClicks(0);
-    }
-    
-    setTimeout(() => setLogoClicks(0), 3000);
-  };
-
-  const handlePasswordSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password === "333") {
-      navigate("/admin");
-      setShowPasswordPrompt(false);
-      setPassword("");
-    } else {
-      alert("Incorrect password");
-      setPassword("");
     }
   };
 
@@ -149,43 +122,6 @@ export const Layout = ({ children, showNav = true }: LayoutProps) => {
       </footer>
 
       <ChatBot />
-
-      {/* Password Prompt Modal */}
-      {showPasswordPrompt && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-card p-6 rounded-lg shadow-lg">
-            <h3 className="text-lg font-bold mb-4">Admin Access</h3>
-            <form onSubmit={handlePasswordSubmit}>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter password"
-                className="w-full px-4 py-2 border border-border rounded-md mb-4"
-                autoFocus
-              />
-              <div className="flex gap-2">
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-primary text-primary-foreground rounded-md"
-                >
-                  Submit
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowPasswordPrompt(false);
-                    setPassword("");
-                  }}
-                  className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
