@@ -20,7 +20,9 @@ export class AnalyticsAPI {
    * @returns Dashboard statistics including counts and revenue
    */
   static async getDashboardStats(): Promise<DashboardStats> {
-    const { data, error } = await supabase.functions.invoke('analytics');
+    const { data, error } = await supabase.functions.invoke('analytics', {
+      method: 'GET',
+    });
 
     if (error) throw new Error(`Failed to get dashboard stats: ${error.message}`);
     return data;
