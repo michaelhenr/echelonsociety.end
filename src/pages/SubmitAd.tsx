@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { AdsAPI } from "@/services/api";
 import { useNavigate } from "react-router-dom";
 import bgLogo7 from "@/assets/bg-logo-7.jpg";
 
@@ -34,17 +34,14 @@ const SubmitAd = () => {
     }
 
     try {
-      const { error } = await supabase.from("ads").insert({
+      await AdsAPI.create({
         title: formData.title,
         description: formData.description,
         budget: parseFloat(formData.budget),
         image_url: formData.imageUrl,
         start_date: formData.startDate,
         end_date: formData.endDate,
-        active: true,
       });
-
-      if (error) throw error;
 
       toast({
         title: "Success!",

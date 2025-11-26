@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { ProductsAPI, BrandsAPI } from "@/services/api";
 import { useNavigate } from "react-router-dom";
 import bgLogo9 from "@/assets/bg-logo-9.jpg";
 
@@ -28,8 +28,16 @@ const SubmitProduct = () => {
   }, []);
 
   const fetchBrands = async () => {
-    const { data } = await supabase.from("brands").select("*");
-    if (data) setBrands(data);
+    try {
+      const data = await BrandsAPI.list();
+      setBrands(data || []);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,17 +53,14 @@ const SubmitProduct = () => {
     }
 
     try {
-      const { error } = await supabase.from("products").insert({
+      await ProductsAPI.create({
         name: formData.name,
         description: formData.description,
         price: parseFloat(formData.price),
         category: formData.category,
         brand_id: formData.brandId,
         image_url: formData.imageUrl,
-        in_stock: true,
       });
-
-      if (error) throw error;
 
       toast({
         title: "Success!",

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { ProductsAPI } from "@/services/api";
 import { useNavigate } from "react-router-dom";
 import vcrew from "@/assets/product-quarter-hoodie.jpg";
 import hoodie from "@/assets/product-vcrew.jpg";
@@ -42,35 +42,28 @@ const Products = () => {
   }, []);
 
   const fetchProducts = async () => {
-    const { data, error } = await supabase
-      .from("products")
-      .select(`
-        *,
-        brands (name)
-      `)
-      .eq("in_stock", true);
+    try {
+      const data = await ProductsAPI.list({ in_stock: true });
 
-    if (error) {
+      // Add local images for Echelon products
+      const productsWithImages = data.map((product: any) => {
+        if (product.name === "V Crew Sweatshirt") {
+          return { ...product, image_url: vcrew };
+        } else if (product.name === "Echelon Quarter Hoodie") {
+          return { ...product, image_url: hoodie };
+        }
+        return product;
+      });
+
+      setProducts(productsWithImages);
+      setFilteredProducts(productsWithImages);
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to load products",
+        description: error.message,
         variant: "destructive",
       });
-      return;
     }
-
-    // Add local images for Echelon products
-    const productsWithImages = data?.map(product => {
-      if (product.name === "V Crew Sweatshirt") {
-        return { ...product, image_url: vcrew };
-      } else if (product.name === "Echelon Quarter Hoodie") {
-        return { ...product, image_url: hoodie };
-      }
-      return product;
-    }) || [];
-
-    setProducts(productsWithImages);
-    setFilteredProducts(productsWithImages);
   };
 
   // Filter products

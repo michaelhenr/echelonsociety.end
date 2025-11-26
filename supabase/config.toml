@@ -2,3 +2,24 @@ project_id = "qrdrxkwxcrjhdypbpkmo"
 
 [functions.chat]
 verify_jwt = false
+
+[functions.products]
+verify_jwt = false
+
+[functions.orders]
+verify_jwt = false
+
+[functions.brands]
+verify_jwt = false
+
+[functions.ads]
+verify_jwt = false
+
+[functions.analytics]
+verify_jwt = false
+
+[functions.newsletter]
+verify_jwt = false
+
+[functions.clients]
+verify_jwt = false

@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { ClientsAPI } from "@/services/api";
 import logo from "@/assets/logo.jpg";
 import bgImage from "@/assets/bg-logo-1.jpg";
 
@@ -31,15 +31,11 @@ const RoleSelection = () => {
     }
 
     try {
-      const { error } = await supabase
-        .from("client_entries")
-        .insert([{ name: clientName.trim() }]);
-
-      if (error) throw error;
+      const response = await ClientsAPI.register(clientName.trim());
 
       toast({
         title: "Welcome!",
-        description: `Welcome to Echelon, ${clientName}!`,
+        description: response.message,
       });
 
       setShowNameDialog(false);
