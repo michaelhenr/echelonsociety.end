@@ -34,8 +34,8 @@ export class OrdersAPI {
     // Validate required fields
     this.validateOrderData(orderData);
 
-    const { data, error } = await supabase.functions.invoke('orders', {
-      body: { action: 'create', ...orderData },
+    const { data, error } = await supabase.functions.invoke('orders?action=create', {
+      body: orderData,
       method: 'POST',
     });
 
@@ -49,8 +49,12 @@ export class OrdersAPI {
    * @returns Array of orders
    */
   static async list(status?: string) {
-    const { data, error } = await supabase.functions.invoke('orders', {
-      body: { action: 'list', status },
+    const params = new URLSearchParams();
+    params.append('action', 'list');
+    if (status) params.append('status', status);
+
+    const { data, error } = await supabase.functions.invoke(`orders?${params.toString()}`, {
+      method: 'GET',
     });
 
     if (error) throw new Error(`Failed to list orders: ${error.message}`);
@@ -65,8 +69,8 @@ export class OrdersAPI {
   static async get(id: string) {
     if (!id) throw new Error('Order ID is required');
 
-    const { data, error } = await supabase.functions.invoke('orders', {
-      body: { action: 'get', id },
+    const { data, error } = await supabase.functions.invoke(`orders?action=get&id=${id}`, {
+      method: 'GET',
     });
 
     if (error) throw new Error(`Failed to get order: ${error.message}`);
@@ -90,8 +94,8 @@ export class OrdersAPI {
       throw new Error(`Invalid status. Must be one of: ${validStatuses.join(', ')}`);
     }
 
-    const { data, error } = await supabase.functions.invoke('orders', {
-      body: { action: 'update_status', id, status },
+    const { data, error } = await supabase.functions.invoke('orders?action=update_status', {
+      body: { id, status },
       method: 'PUT',
     });
 
