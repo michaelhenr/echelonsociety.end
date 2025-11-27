@@ -14,17 +14,54 @@ interface LayoutProps {
 
 /**
  * Layout component providing consistent navigation and structure
+ * Includes admin access via 5 logo clicks + password
  */
 export const Layout = ({ children, showNav = true }: LayoutProps) => {
+  const [logoClicks, setLogoClicks] = useState(0);
+  const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
+  const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
 
   const handleLogoClick = () => {
-    // Navigate to home only if not already there
-    if (location.pathname !== "/home") {
+    const newClicks = logoClicks + 1;
+    
+    // Single click navigates to home only if not already there
+    if (newClicks === 1 && location.pathname !== "/home") {
       navigate("/home");
+    }
+    
+    setLogoClicks(newClicks);
+    
+    // 5 clicks triggers password prompt
+    if (newClicks === 5) {
+      setShowPasswordPrompt(true);
+      setLogoClicks(0);
+    }
+    
+    // Reset counter after 3 seconds
+    setTimeout(() => setLogoClicks(0), 3000);
+  };
+
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password === "333") {
+      navigate("/admin");
+      setShowPasswordPrompt(false);
+      setPassword("");
+      toast({
+        title: "Access Granted",
+        description: "Welcome to Admin Panel",
+      });
+    } else {
+      toast({
+        title: "Access Denied",
+        description: "Incorrect password",
+        variant: "destructive",
+      });
+      setPassword("");
     }
   };
 
@@ -128,6 +165,43 @@ export const Layout = ({ children, showNav = true }: LayoutProps) => {
       </footer>
 
       <ChatBot />
+
+      {/* Password Prompt Modal */}
+      {showPasswordPrompt && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-card p-6 rounded-lg shadow-lg border border-border">
+            <h3 className="text-lg font-bold mb-4 text-foreground">Admin Access</h3>
+            <form onSubmit={handlePasswordSubmit}>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter password"
+                className="w-full px-4 py-2 border border-border rounded-md mb-4 bg-background text-foreground"
+                autoFocus
+              />
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:opacity-90 transition-opacity"
+                >
+                  Submit
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowPasswordPrompt(false);
+                    setPassword("");
+                  }}
+                  className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:opacity-90 transition-opacity"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
