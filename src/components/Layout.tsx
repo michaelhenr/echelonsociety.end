@@ -6,7 +6,6 @@ import { useToast } from "@/hooks/use-toast";
 import { NewsletterAPI } from "@/services/api";
 import { ChatBot } from "@/components/ChatBot";
 import logo from "@/assets/logo.jpg";
-
 interface LayoutProps {
   children: ReactNode;
   showNav?: boolean;
@@ -16,35 +15,37 @@ interface LayoutProps {
  * Layout component providing consistent navigation and structure
  * Includes admin access via 5 logo clicks + password
  */
-export const Layout = ({ children, showNav = true }: LayoutProps) => {
+export const Layout = ({
+  children,
+  showNav = true
+}: LayoutProps) => {
   const [logoClicks, setLogoClicks] = useState(0);
   const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   const handleLogoClick = () => {
     const newClicks = logoClicks + 1;
-    
+
     // Single click navigates to home only if not already there
     if (newClicks === 1 && location.pathname !== "/home") {
       navigate("/home");
     }
-    
     setLogoClicks(newClicks);
-    
+
     // 5 clicks triggers password prompt
     if (newClicks === 5) {
       setShowPasswordPrompt(true);
       setLogoClicks(0);
     }
-    
+
     // Reset counter after 3 seconds
     setTimeout(() => setLogoClicks(0), 3000);
   };
-
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (password === "333") {
@@ -53,68 +54,56 @@ export const Layout = ({ children, showNav = true }: LayoutProps) => {
       setPassword("");
       toast({
         title: "Access Granted",
-        description: "Welcome to Admin Panel",
+        description: "Welcome to Admin Panel"
       });
     } else {
       toast({
         title: "Access Denied",
         description: "Incorrect password",
-        variant: "destructive",
+        variant: "destructive"
       });
       setPassword("");
     }
   };
-
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!email) {
       toast({
         title: "Error",
         description: "Please enter your email",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     try {
       const response = await NewsletterAPI.subscribe(email);
-
       toast({
         title: "Success!",
-        description: response.message || "You'll receive 10% off your next order!",
+        description: response.message || "You'll receive 10% off your next order!"
       });
       setEmail("");
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
-  return (
-    <div className="min-h-screen bg-background flex flex-col">
+  return <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="border-b border-border bg-card">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <img 
-                src={logo} 
-                alt="Echelon Society" 
-                className="h-12 w-12 cursor-pointer object-contain"
-                onClick={handleLogoClick}
-              />
+              <img src={logo} alt="Echelon Society" className="h-12 w-12 cursor-pointer object-contain" onClick={handleLogoClick} />
               <div>
                 <h1 className="text-2xl font-bold text-primary">Echelon Society</h1>
                 <p className="text-sm text-muted-foreground">A Higher Standard</p>
               </div>
             </div>
             
-            {showNav && (
-              <nav className="flex gap-6">
+            {showNav && <nav className="flex gap-6">
                 <Link to="/" className="text-foreground hover:text-primary transition-colors">
                   Home
                 </Link>
@@ -127,11 +116,8 @@ export const Layout = ({ children, showNav = true }: LayoutProps) => {
                 <Link to="/auth" className="text-foreground hover:text-primary transition-colors">
                   Login
                 </Link>
-                <Link to="/admin" className="text-foreground hover:text-primary transition-colors">
-                  Admin
-                </Link>
-              </nav>
-            )}
+                
+              </nav>}
           </div>
         </div>
       </header>
@@ -148,13 +134,7 @@ export const Layout = ({ children, showNav = true }: LayoutProps) => {
               Subscribe to our newsletter and get 10% off your next order
             </p>
             <form onSubmit={handleNewsletterSubmit} className="flex gap-2">
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                className="flex-1"
-              />
+              <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Enter your email" className="flex-1" />
               <Button type="submit">Subscribe</Button>
             </form>
             <p className="text-sm text-muted-foreground">
@@ -167,41 +147,24 @@ export const Layout = ({ children, showNav = true }: LayoutProps) => {
       <ChatBot />
 
       {/* Password Prompt Modal */}
-      {showPasswordPrompt && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      {showPasswordPrompt && <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-card p-6 rounded-lg shadow-lg border border-border">
             <h3 className="text-lg font-bold mb-4 text-foreground">Admin Access</h3>
             <form onSubmit={handlePasswordSubmit}>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter password"
-                className="w-full px-4 py-2 border border-border rounded-md mb-4 bg-background text-foreground"
-                autoFocus
-              />
+              <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Enter password" className="w-full px-4 py-2 border border-border rounded-md mb-4 bg-background text-foreground" autoFocus />
               <div className="flex gap-2">
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:opacity-90 transition-opacity"
-                >
+                <button type="submit" className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:opacity-90 transition-opacity">
                   Submit
                 </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowPasswordPrompt(false);
-                    setPassword("");
-                  }}
-                  className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:opacity-90 transition-opacity"
-                >
+                <button type="button" onClick={() => {
+              setShowPasswordPrompt(false);
+              setPassword("");
+            }} className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:opacity-90 transition-opacity">
                   Cancel
                 </button>
               </div>
             </form>
           </div>
-        </div>
-      )}
-    </div>
-  );
+        </div>}
+    </div>;
 };
