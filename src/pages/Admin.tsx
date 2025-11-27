@@ -37,76 +37,8 @@ const Admin = () => {
   });
 
   useEffect(() => {
-    const init = async () => {
-      const isAdmin = await checkAdminAccess();
-      if (isAdmin) {
-        await fetchData();
-      }
-    };
-    init();
+    fetchData();
   }, []);
-
-  const checkAdminAccess = async () => {
-    try {
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      
-      if (userError || !user) {
-        toast({
-          title: "Access Denied",
-          description: "Please log in as admin",
-          variant: "destructive",
-        });
-        // Redirect to auth page
-        setTimeout(() => navigate("/auth"), 2000);
-        return false;
-      }
-
-      // Check for admin role
-      const { data: roleData, error: roleError } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .eq("role", "admin")
-        .maybeSingle();
-
-      if (roleError) {
-        console.error("[Admin] Error checking role:", roleError);
-        toast({
-          title: "Access Denied",
-          description: "Error verifying admin permissions",
-          variant: "destructive",
-        });
-        return false;
-      }
-
-      if (!roleData) {
-        toast({
-          title: "Access Denied",
-          description: "You don't have admin permissions. Contact system administrator.",
-          variant: "destructive",
-        });
-        return false;
-      }
-
-      // Success! Show green confirmation with admin name
-      const adminName = user.user_metadata?.name || user.email?.split('@')[0] || 'Admin';
-      toast({
-        title: "✓ Access Confirmed",
-        description: `Welcome Admin, ${adminName}`,
-        className: "bg-green-600 text-white border-green-700",
-      });
-      
-      return true;
-    } catch (error: any) {
-      console.error("[Admin] Access check error:", error);
-      toast({
-        title: "Access Denied",
-        description: error.message || "Failed to verify admin access",
-        variant: "destructive",
-      });
-      return false;
-    }
-  };
 
   const fetchData = async () => {
     try {
