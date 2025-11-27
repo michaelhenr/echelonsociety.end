@@ -87,6 +87,12 @@ export const Layout = ({ children, showNav = true }: LayoutProps) => {
                 <Link to="/products" className="text-foreground hover:text-primary transition-colors">
                   Products
                 </Link>
+                <Link to="/auth" className="text-foreground hover:text-primary transition-colors">
+                  Login
+                </Link>
+                <Link to="/admin" className="text-foreground hover:text-primary transition-colors">
+                  Admin
+                </Link>
               </nav>
             )}
           </div>
