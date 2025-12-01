@@ -71,3 +71,24 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+## Project Organization
+
+This repository has been organized to separate frontend and backend resources:
+- frontend/: Contains the Vite React frontend (all previous `src` content)
+- backend/: Contains server resources, Supabase functions and DB migrations
+- cypress/: Cypress E2E tests
+
+Testing:
+- Unit tests with Vitest + React Testing Library
+- E2E tests with Cypress
+
+Run tests locally:
+```powershell
+npm install
+npm test            # Run vitest unit tests
+npm run dev         # Start the app
+npm run cy:open     # Open Cypress UI
+npm run cy:run      # Run Cypress headless
+```
+

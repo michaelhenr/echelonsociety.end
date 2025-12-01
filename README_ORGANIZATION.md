@@ -5,7 +5,7 @@ Top-level folders created:
 - cypress/: Cypress E2E tests and config
 
 Notes:
-- The frontend source remains in `src/` to avoid breaking Vite config and app behavior. If you want it moved into `frontend/src/`, we can migrate and update `vite.config.ts` and `tsconfig.json` accordingly.
+- The frontend source has been moved to `frontend/src/` and relevant config paths were updated.
 - Vitest is configured and a unit test for the `Home` page is added at `src/__tests__/Home.test.tsx`.
 - Cypress E2E tests were added under `cypress/e2e`.
 
