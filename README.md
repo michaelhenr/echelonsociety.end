@@ -77,11 +77,15 @@ Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/c
 This repository has been organized to separate frontend and backend resources:
 - frontend/: Contains the Vite React frontend (all previous `src` content)
 - backend/: Contains server resources, Supabase functions and DB migrations
+ - backend/: Contains an optional Express backend (server) for local development and API endpoints. The Supabase functions and migrations remain under `supabase/` for CLI compatibility.
 - cypress/: Cypress E2E tests
 
 Testing:
 - Unit tests with Vitest + React Testing Library
 - E2E tests with Cypress
+
+Backend local dev
+ - You can run a local backend server which is useful for testing or adding custom server routes that proxy to Lovable AI or perform admin tasks. Start by navigating to `backend/`, installing dependencies, and run `npm run start`.
 
 Run tests locally:
 ```powershell
