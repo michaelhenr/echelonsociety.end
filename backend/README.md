@@ -12,3 +12,18 @@ Notes
 
 Deployment
 - Use the Supabase CLI or the web dashboard to deploy functions and migrations from the `supabase/` (or `backend/supabase/`) folder.
+
+Local Express API (optional)
+- `server.js` exposes these API endpoints when you run backend server:
+  - GET `/api/products` - returns public products
+  - POST `/api/products` - create a product (protected; requires Authorization header)
+  - GET `/api/brands` - returns brand list
+  - POST `/api/brands` - create a brand (protected)
+  - GET `/api/ads` - returns ads
+  - POST `/api/ads` - create an ad (protected)
+  - GET `/api/orders` - returns orders (protected)
+  - POST `/api/orders` - create an order (public)
+  - POST `/api/chat` - proxied chat endpoint (uses `LOVABLE_API_KEY`)
+
+Notes
+- Use `backend/.env.example` to configure your env vars. To let the frontend call the local backend (instead of supabase functions), set `VITE_API_BASE_URL` in the frontend `.env` file (e.g., `VITE_API_BASE_URL=http://localhost:4000`).
