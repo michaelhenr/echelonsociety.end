@@ -5,6 +5,7 @@ import productsRouter from './Routes/products.js'
 import brandsRouter from './Routes/brands.js'
 import adsRouter from './Routes/ads.js'
 import ordersRouter from './Routes/orders.js'
+import chatRouter from './Routes/chat.js'
 
 dotenv.config()
 
@@ -18,6 +19,7 @@ app.use('/api/products', productsRouter)
 app.use('/api/brands', brandsRouter)
 app.use('/api/ads', adsRouter)
 app.use('/api/orders', ordersRouter)
+app.use('/api/chat', chatRouter)
 
 const PORT = process.env.PORT || 4000
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`))

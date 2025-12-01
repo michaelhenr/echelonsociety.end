@@ -14,6 +14,14 @@ Testing
 - Generate per-page tests: `npm run test:generate`
 - E2E tests: start `npm run dev` and run `npm run cy:open` for Cypress UI
 
+Optional: If you want the frontend to call a local backend server (instead of supabase edge functions), set this environment variable in your `.env` file:
+
+```
+VITE_API_BASE_URL=http://localhost:4000
+```
+
+If this variable is set, the `ChatBot` will call `POST $VITE_API_BASE_URL/api/chat` instead of the Supabase function; other endpoints are available under `/api/*` (products, brands, ads, orders).
+
 Notes
 - The frontend communicates with Supabase via `@/integrations/supabase/client`.
 - A Supabase function `chat` is invoked by `frontend/src/components/ChatBot.tsx` using `supabase.functions.invoke('chat')`.

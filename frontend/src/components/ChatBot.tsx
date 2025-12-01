@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MessageCircle, X, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+const API_BASE = import.meta.env.VITE_API_BASE_URL
 
 export const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -20,14 +21,23 @@ export const ChatBot = () => {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke("chat", {
-        body: { message: input },
-      });
-
-      if (error) throw error;
-
-      const assistantMessage = { role: "assistant", content: data.reply };
-      setMessages((prev) => [...prev, assistantMessage]);
+      if (API_BASE) {
+        const resp = await fetch(`${API_BASE}/api/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: input }),
+        })
+        const data = await resp.json()
+        const assistantMessage = { role: 'assistant', content: data.reply }
+        setMessages((prev) => [...prev, assistantMessage])
+      } else {
+        const { data, error } = await supabase.functions.invoke('chat', {
+          body: { message: input },
+        })
+        if (error) throw error
+        const assistantMessage = { role: 'assistant', content: data.reply }
+        setMessages((prev) => [...prev, assistantMessage])
+      }
     } catch (error: any) {
       console.error("Chat error:", error);
       setMessages((prev) => [
