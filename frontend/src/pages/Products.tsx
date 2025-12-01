@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import api from '@/lib/api';
 import { useNavigate } from "react-router-dom";
 import vcrew from "@/assets/product-quarter-hoodie.jpg";
 import hoodie from "@/assets/product-vcrew.jpg";
@@ -38,26 +38,21 @@ const Products = () => {
 
   // Fetch products
   useEffect(() => {
-    fetchProducts();
+    const load = async () => {
+      try {
+        const data = await api.fetchProducts();
+        setProducts(data as any[]);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    load();
   }, []);
 
   const fetchProducts = async () => {
-    const { data, error } = await supabase
-      .from("products")
-      .select(`
-        *,
-        brands (name)
-      `)
-      .eq("in_stock", true);
+    const { data, error } = await supabase.from("products").select(`*, brands (name)`).eq("in_stock", true);
 
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load products",
-        variant: "destructive",
-      });
-      return;
-    }
+    if (error) return;
 
     // Add local images for Echelon products
     const productsWithImages = data?.map(product => {
