@@ -1,25 +1,50 @@
-import express from 'express'
-import cors from 'cors'
-import dotenv from 'dotenv'
-import productsRouter from './Routes/products.js'
-import brandsRouter from './Routes/brands.js'
-import adsRouter from './Routes/ads.js'
-import ordersRouter from './Routes/orders.js'
-import chatRouter from './Routes/chat.js'
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import xssClean from 'xss-clean';
+import dotenv from 'dotenv';
+import MongoConnect from './DB/MongoConnect.js';
+import Product from './Models/Product.js';
+import userRoutes from './Routes/user.js';
+import productRoutes from './Routes/product.js';
+import cartRoutes from './Routes/orders.js';
+import notificationRoutes from './Routes/Notification.js';
+import chatRouter from './Routes/chat.js';
+import { ensureSeedProducts } from './helpers/seedProducts.js';
 
-dotenv.config()
+dotenv.config();
 
-const app = express()
-app.use(cors())
-app.use(express.json())
+const app = express();
+app.use(express.json());
+app.use(cors());
+app.use(helmet());
+app.use(xssClean());
 
-app.get('/', (req, res) => res.json({ ok: true, message: 'Echelon backend ready' }))
+app.get('/', (req, res) => res.send('test'));
 
-app.use('/api/products', productsRouter)
-app.use('/api/brands', brandsRouter)
-app.use('/api/ads', adsRouter)
-app.use('/api/orders', ordersRouter)
-app.use('/api/chat', chatRouter)
+// Define your MongoDB connection URL and server port
+const URL = process.env.MONGO_URL || process.env.MONGO_URI || 'mongodb://localhost:27017/E-Shop';
+const PORT = process.env.PORT || 3400;
 
-const PORT = process.env.PORT || 4000
-app.listen(PORT, () => console.log(`Server started on port ${PORT}`))
+// Add routes
+app.use('/user', userRoutes);
+app.use('/product', productRoutes);
+app.use('/cart', cartRoutes);
+app.use('/notifications', notificationRoutes);
+app.use('/chat', chatRouter);
+
+// Start function using MongoConnect Singleton
+const start = async () => {
+	try {
+		const dbInstance = MongoConnect.getInstance();
+		await dbInstance.connect(URL);
+		await ensureSeedProducts(Product);
+		app.listen(PORT, () => {
+			console.log(`Server is listening on port ${PORT}`);
+		});
+	} catch (error) {
+		console.error('Error connecting to the database or starting the server:', error);
+	}
+};
+
+start();
