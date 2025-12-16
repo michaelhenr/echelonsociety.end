@@ -37,12 +37,23 @@ If team members need to be added to the MongoDB Atlas cluster:
 Share these test account credentials with your team:
 
 ### Admin Account
-- Email: `admin@echelon.com`
-- Password: `admin123`
+- **Email:** `admin@echelon.com`
+- **Password:** `admin123`
+- **Role:** Admin (can access admin dashboard, approve/reject products, orders, brands, ads)
 
 ### Client Account
-- Email: `client@echelon.com`
-- Password: `client123`
+- **Email:** `client@echelon.com`
+- **Password:** `client123`
+- **Role:** Client (can browse products, make orders, submit products/brands/ads)
 
 **Note:** These are test accounts. Change passwords in production!
+
+## How to Use These Accounts
+
+1. Start the application (backend and frontend)
+2. Go to the sign-in page
+3. Enter the email and password above
+4. You'll be redirected based on your role:
+   - **Admin** → Admin Dashboard
+   - **Client** → Home page (can browse products)
 
