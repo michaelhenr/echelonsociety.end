@@ -4,10 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MessageCircle, X, Send } from "lucide-react";
 import api from '@/lib/api'
-import { supabase } from "@/integrations/supabase/client";
-const API_BASE = import.meta.env.VITE_API_BASE_URL
-const apiPath = API_BASE ? `${API_BASE}/chat` : undefined
-const API_BASE = import.meta.env.VITE_API_BASE_URL
 
 export const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,12 +20,7 @@ export const ChatBot = () => {
     setIsLoading(true);
 
     try {
-      const resp = await fetch(apiPath || `/api/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: input }),
-      })
-      const data = await resp.json()
+      const data = await api.chatMessage(input)
       const assistantMessage = { role: 'assistant', content: data.reply }
       setMessages((prev) => [...prev, assistantMessage])
     } catch (error: any) {

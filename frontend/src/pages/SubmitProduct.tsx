@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import api from "@/lib/api";
 import { useNavigate } from "react-router-dom";
 import bgLogo9 from "@/assets/bg-logo-9.jpg";
 
@@ -28,34 +28,40 @@ const SubmitProduct = () => {
   }, []);
 
   const fetchBrands = async () => {
-    const { data } = await supabase.from("brands").select("*");
-    if (data) setBrands(data);
+    try {
+      const data = await api.fetchBrands();
+      // Only show accepted brands
+      if (data) {
+        const acceptedBrands = data.filter((brand: any) => brand.status === 'accepted');
+        setBrands(acceptedBrands);
+      }
+    } catch (error) {
+      console.error("Error fetching brands:", error);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.price || !formData.category || !formData.brandId) {
+    if (!formData.name || !formData.price || !formData.category || !formData.brandId || !formData.imageUrl) {
       toast({
         title: "Error",
-        description: "Please fill in all required fields",
+        description: "Please fill in all required fields including Image URL",
         variant: "destructive",
       });
       return;
     }
 
     try {
-      const { error } = await supabase.from("products").insert({
+      await api.createProduct({
         name: formData.name,
         description: formData.description,
         price: parseFloat(formData.price),
         category: formData.category,
         brand_id: formData.brandId,
-        image_url: formData.imageUrl,
-        in_stock: true,
+        image_url: formData.imageUrl, // Required - already validated above
+        stock: 1,
       });
-
-      if (error) throw error;
 
       toast({
         title: "Success!",
@@ -85,11 +91,11 @@ const SubmitProduct = () => {
         {brands.length === 0 && (
           <div className="bg-yellow-50 border border-yellow-200 p-4 rounded mb-6">
             <p className="text-yellow-800">
-              No brands found. Please{" "}
+              No accepted brands found. Please{" "}
               <Button variant="link" className="p-0" onClick={() => navigate("/")}>
-                create a brand
+                register a brand
               </Button>{" "}
-              first by selecting "Register Your Brand" option.
+              first by selecting "Register Your Brand" option. Your brand will need to be accepted by an admin before you can use it.
             </p>
           </div>
         )}
@@ -133,10 +139,13 @@ const SubmitProduct = () => {
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Sweatshirts">Sweatshirts</SelectItem>
-                <SelectItem value="Hoodies">Hoodies</SelectItem>
-                <SelectItem value="T-Shirts">T-Shirts</SelectItem>
-                <SelectItem value="Accessories">Accessories</SelectItem>
+                <SelectItem key="sport-accessories" value="Sport Accessories">Sport Accessories</SelectItem>
+                <SelectItem key="electronics" value="Electronics">Electronics</SelectItem>
+                <SelectItem key="clothing" value="Clothing">Clothing</SelectItem>
+                <SelectItem key="accessories" value="Accessories">Accessories</SelectItem>
+                <SelectItem key="home-decor" value="Home & Decor">Home & Decor</SelectItem>
+                <SelectItem key="unique-items" value="Unique Items">Unique Items</SelectItem>
+                <SelectItem key="other" value="Other">Other</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -150,7 +159,7 @@ const SubmitProduct = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {brands.map((brand) => (
-                    <SelectItem key={brand.id} value={brand.id}>
+                    <SelectItem key={brand._id || brand.id || Math.random()} value={brand._id || brand.id || ''}>
                       {brand.name}
                     </SelectItem>
                   ))}
@@ -163,13 +172,40 @@ const SubmitProduct = () => {
           </div>
 
           <div>
-            <Label htmlFor="imageUrl">Image URL</Label>
+            <Label htmlFor="imageUrl">Image URL *</Label>
             <Input
               id="imageUrl"
               type="url"
               value={formData.imageUrl}
               onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+              placeholder="https://example.com/image.jpg"
+              required
             />
+            <p className="text-sm text-muted-foreground mt-1">
+              Image URL is required. 
+              <br />
+              <span className="text-xs font-semibold text-amber-600">⚠️ IMPORTANT: Use DIRECT image URLs only!</span>
+              <br />
+              <span className="text-xs font-semibold text-green-600">✅ CORRECT format:</span>
+              <br />
+              <span className="text-xs font-mono bg-muted p-1 rounded break-all">https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?q=80&w=998&auto=format&fit=crop</span>
+              <br />
+              <span className="text-xs font-semibold text-red-600">❌ WRONG (don't use):</span>
+              <br />
+              <span className="text-xs text-red-500">• unsplash.com/photos/... (photo page URL)</span>
+              <br />
+              <span className="text-xs text-red-500">• unsplash.com/photos/.../download (download URL)</span>
+              <br />
+              <span className="text-xs mt-2">How to get the correct URL:</span>
+              <br />
+              <span className="text-xs">1. Go to Unsplash photo page</span>
+              <br />
+              <span className="text-xs">2. Right-click the image → "Copy image address"</span>
+              <br />
+              <span className="text-xs">3. Or click "Download" → copy the redirected URL</span>
+              <br />
+              <span className="text-xs">4. URL must start with: https://images.unsplash.com/photo-</span>
+            </p>
           </div>
 
           <Button type="submit" className="w-full" disabled={brands.length === 0}>

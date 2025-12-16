@@ -15,7 +15,7 @@ const orderSchema = new mongoose.Schema({
   shipping_cost: Number,
   total_amount: Number,
   items: [orderItemSchema],
-  status: { type: String, default: 'pending' },
+  status: { type: String, enum: ['pending', 'accepted', 'rejected'], default: 'pending' },
   created_at: { type: Date, default: Date.now }
 })
 

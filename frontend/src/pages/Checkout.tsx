@@ -5,15 +5,25 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import api from "@/lib/api";
 import { useNavigate, useLocation } from "react-router-dom";
 import bgLogo5 from "@/assets/bg-logo-5.jpg";
 
 const Checkout = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { cart, products } = location.state || { cart: new Map(), products: [] };
+  const { cart: cartState, products: productsState } = location.state || { cart: {}, products: [] };
   const { toast } = useToast();
+  
+  // Convert cart object back to Map (React Router serializes Maps as objects)
+  const cart = cartState instanceof Map ? cartState : new Map(Object.entries(cartState || {}));
+  const products = productsState || [];
+  
+  // Redirect if no cart items
+  if (cart.size === 0) {
+    navigate("/products");
+    return null;
+  }
 
   const [formData, setFormData] = useState({
     name: "",
@@ -26,7 +36,7 @@ const Checkout = () => {
   const calculateTotal = () => {
     let total = 0;
     cart.forEach((quantity: number, productId: string) => {
-      const product = products.find((p: any) => p.id === productId);
+      const product = products.find((p: any) => (p._id || p.id) === productId);
       if (product) {
         total += product.price * quantity;
       }
@@ -59,40 +69,39 @@ const Checkout = () => {
     const total = subtotal + shipping;
 
     try {
-      // Create order
-      const { data: order, error: orderError } = await supabase
-        .from("orders")
-        .insert({
-          client_name: formData.name,
-          client_email: formData.email,
-          client_phone: formData.phone,
-          client_address: formData.address,
-          client_city: formData.city,
-          total_amount: total,
-          shipping_cost: shipping,
-          status: "pending",
-        })
-        .select()
-        .single();
-
-      if (orderError) throw orderError;
-
-      // Create order items
+      // Create order with items
       const orderItems = Array.from(cart.entries()).map(([productId, quantity]) => {
-        const product = products.find((p: any) => p.id === productId);
+        const product = products.find((p: any) => (p._id || p.id) === productId);
+        if (!product) {
+          throw new Error(`Product not found for ID: ${productId}`);
+        }
         return {
-          order_id: order.id,
           product_id: productId,
           quantity,
           price: product.price,
         };
       });
 
-      const { error: itemsError } = await supabase
-        .from("order_items")
-        .insert(orderItems);
+      if (orderItems.length === 0) {
+        toast({
+          title: "Error",
+          description: "Your cart is empty",
+          variant: "destructive",
+        });
+        return;
+      }
 
-      if (itemsError) throw itemsError;
+      await api.createOrder({
+        client_name: formData.name,
+        client_email: formData.email,
+        client_phone: formData.phone,
+        client_address: formData.address,
+        client_city: formData.city,
+        total_amount: total,
+        shipping_cost: shipping,
+        status: "pending",
+        items: orderItems,
+      });
 
       toast({
         title: "Order Placed Successfully!",

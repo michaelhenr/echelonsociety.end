@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import api from "@/lib/api";
 import { useNavigate } from "react-router-dom";
 import bgLogo7 from "@/assets/bg-logo-7.jpg";
 
@@ -24,6 +24,7 @@ const SubmitAd = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validate required fields
     if (!formData.title || !formData.budget || !formData.startDate || !formData.endDate) {
       toast({
         title: "Error",
@@ -33,18 +34,56 @@ const SubmitAd = () => {
       return;
     }
 
+    // Validate dates
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to start of day for comparison
+    
+    const startDate = new Date(formData.startDate);
+    startDate.setHours(0, 0, 0, 0);
+    
+    const endDate = new Date(formData.endDate);
+    endDate.setHours(0, 0, 0, 0);
+
+    // Check if start date is in the past
+    if (startDate < today) {
+      toast({
+        title: "Invalid Start Date",
+        description: "Start date cannot be in the past. Please select today or a future date.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if end date is in the past
+    if (endDate < today) {
+      toast({
+        title: "Invalid End Date",
+        description: "End date cannot be in the past. Please select today or a future date.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if end date is before start date
+    if (endDate < startDate) {
+      toast({
+        title: "Invalid Date Range",
+        description: "End date must be after or equal to start date.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
-      const { error } = await supabase.from("ads").insert({
+      await api.createAd({
         title: formData.title,
         description: formData.description,
         budget: parseFloat(formData.budget),
-        image_url: formData.imageUrl,
+        image_url: formData.imageUrl || undefined, // Only send if provided
         start_date: formData.startDate,
         end_date: formData.endDate,
         active: true,
       });
-
-      if (error) throw error;
 
       toast({
         title: "Success!",
@@ -104,13 +143,15 @@ const SubmitAd = () => {
           </div>
 
           <div>
-            <Label htmlFor="imageUrl">Image URL</Label>
+            <Label htmlFor="imageUrl">Image URL (Optional)</Label>
             <Input
               id="imageUrl"
               type="url"
               value={formData.imageUrl}
               onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+              placeholder="https://example.com/image.jpg"
             />
+            <p className="text-sm text-muted-foreground mt-1">Leave empty if you don't have an image URL</p>
           </div>
 
           <div>
@@ -120,8 +161,10 @@ const SubmitAd = () => {
               type="date"
               value={formData.startDate}
               onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+              min={new Date().toISOString().split('T')[0]} // Prevent selecting past dates
               required
             />
+            <p className="text-sm text-muted-foreground mt-1">Must be today or a future date</p>
           </div>
 
           <div>
@@ -131,8 +174,10 @@ const SubmitAd = () => {
               type="date"
               value={formData.endDate}
               onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+              min={formData.startDate || new Date().toISOString().split('T')[0]} // Must be after start date
               required
             />
+            <p className="text-sm text-muted-foreground mt-1">Must be after or equal to start date</p>
           </div>
 
           <Button type="submit" className="w-full">Submit Ad</Button>

@@ -4,15 +4,16 @@ import helmet from 'helmet';
 import xssClean from 'xss-clean';
 import dotenv from 'dotenv';
 import MongoConnect from './DB/MongoConnect.js';
-import PostgresConnect from './DB/postgresClient.js';
 import Product from './Models/Product.js';
 import userRoutes from './Routes/user.js';
 import productRoutes from './Routes/product.js';
 import cartRoutes from './Routes/orders.js';
 import notificationRoutes from './Routes/Notification.js';
 import chatRouter from './Routes/chat.js';
+import brandsRoutes from './Routes/brands.js';
+import adsRoutes from './Routes/ads.js';
+import unsplashRoutes from './Routes/unsplash.js';
 import { ensureSeedProducts } from './helpers/seedProducts.js';
-import { initializePostgresDB } from './helpers/initPostgres.js';
 
 dotenv.config();
 
@@ -57,14 +58,15 @@ app.use('/product', productRoutes);
 app.use('/cart', cartRoutes);
 app.use('/notifications', notificationRoutes);
 app.use('/chat', chatRouter);
+app.use('/brands', brandsRoutes);
+app.use('/ads', adsRoutes);
+app.use('/unsplash', unsplashRoutes);
 
 /**
- * Start function - Initialize both MongoDB and PostgreSQL
+ * Start function - Initialize MongoDB
  * 
  * Environment Variables:
  * - MONGO_URL: MongoDB connection string
- * - DATABASE_URL: PostgreSQL connection string (from .env)
- * - INIT_POSTGRES: Set to 'true' to initialize PostgreSQL database
  * - PORT: Server port (default: 3400)
  */
 const start = async () => {
@@ -76,20 +78,6 @@ const start = async () => {
 		const mongoInstance = MongoConnect.getInstance();
 		await mongoInstance.connect(MONGO_URL);
 		console.log('✅ MongoDB connected successfully\n');
-
-		// Connect/Initialize PostgreSQL
-		console.log('📍 Connecting to PostgreSQL...');
-		const pgInstance = PostgresConnect.getInstance();
-		
-		// Check if we should initialize the database
-		if (process.env.INIT_POSTGRES === 'true') {
-			console.log('🔧 Database initialization flag is enabled\n');
-			await initializePostgresDB();
-		} else {
-			// Just connect to PostgreSQL without full initialization
-			await pgInstance.connect();
-		}
-		console.log('✅ PostgreSQL connected successfully\n');
 
 		// Seed MongoDB products
 		console.log('🌱 Ensuring seed products in MongoDB...');
@@ -109,17 +97,15 @@ const start = async () => {
 			console.log(`   POST http://localhost:${PORT}/cart/*       (Order routes)`);
 			console.log(`   POST http://localhost:${PORT}/notifications/* (Notification routes)`);
 			console.log(`   POST http://localhost:${PORT}/chat/*       (Chat routes)\n`);
-			console.log(`📦 Databases:`);
+			console.log(`📦 Database:`);
 			console.log(`   MongoDB:     ${MONGO_URL.split('/').pop() || 'E-Shop'}`);
-			console.log(`   PostgreSQL:  Supabase (${process.env.DATABASE_URL ? '✅ Connected' : '❌ Not configured'})`);
 			console.log(`${'='.repeat(60)}\n`);
 		});
 	} catch (error) {
 		console.error('❌ Error starting server:', error.message);
 		console.error('\nTroubleshooting:');
 		console.error('1. Check MongoDB connection: MONGO_URL environment variable');
-		console.error('2. Check PostgreSQL connection: DATABASE_URL environment variable');
-		console.error('3. Verify .env file exists with required variables');
+		console.error('2. Verify .env file exists with required variables');
 		process.exit(1);
 	}
 };

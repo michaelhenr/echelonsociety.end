@@ -6,19 +6,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import api from '@/lib/api';
 import { useNavigate } from "react-router-dom";
-import vcrew from "@/assets/product-quarter-hoodie.jpg";
-import hoodie from "@/assets/product-vcrew.jpg";
+import { ProductCard } from "@/components/ProductCard";
 import bgLogo5 from "@/assets/bg-logo-5.jpg";
 import bgLogo6 from "@/assets/bg-logo-6.jpg";
 import bgLogo7 from "@/assets/bg-logo-7.jpg";
 
 interface Product {
-  id: string;
+  _id?: string;
+  id?: string;
   name: string;
   description: string | null;
   price: number;
   category: string;
-  image_url: string | null;
+  image_url: string; // Required - comes from database only
   brand_id: string;
   brands?: { name: string };
 }
@@ -41,32 +41,25 @@ const Products = () => {
     const load = async () => {
       try {
         const data = await api.fetchProducts();
-        setProducts(data as any[]);
+        // Use products directly from database - no hardcoded image mapping
+        // All images must come from database image_url field
+        const productsList = data || [];
+        // Log products to verify image_url is present
+        productsList.forEach((product: any) => {
+          if (!product.image_url) {
+            console.warn(`⚠️ Product "${product.name}" (ID: ${product._id || product.id}) is missing image_url in database`);
+          } else {
+            console.log(`✅ Product "${product.name}" has image_url:`, product.image_url);
+          }
+        });
+        setProducts(productsList);
+        setFilteredProducts(productsList);
       } catch (err) {
-        console.error(err);
+        console.error('Error fetching products:', err);
       }
     };
     load();
   }, []);
-
-  const fetchProducts = async () => {
-    const { data, error } = await supabase.from("products").select(`*, brands (name)`).eq("in_stock", true);
-
-    if (error) return;
-
-    // Add local images for Echelon products
-    const productsWithImages = data?.map(product => {
-      if (product.name === "V Crew Sweatshirt") {
-        return { ...product, image_url: vcrew };
-      } else if (product.name === "Echelon Quarter Hoodie") {
-        return { ...product, image_url: hoodie };
-      }
-      return product;
-    }) || [];
-
-    setProducts(productsWithImages);
-    setFilteredProducts(productsWithImages);
-  };
 
   // Filter products
   useEffect(() => {
@@ -93,13 +86,29 @@ const Products = () => {
 
   const addToCart = (productId: string) => {
     const newCart = new Map(cart);
-    newCart.set(productId, (newCart.get(productId) || 0) + 1);
+    // Use _id or id as the key - ensure we use the same format
+    const key = productId;
+    newCart.set(key, (newCart.get(key) || 0) + 1);
     setCart(newCart);
     
     toast({
       title: "Added to Cart",
       description: "Product added successfully",
     });
+  };
+
+  const goToCheckout = () => {
+    if (cart.size === 0) {
+      toast({
+        title: "Cart is Empty",
+        description: "Add some products to your cart first",
+        variant: "destructive",
+      });
+      return;
+    }
+    // Convert Map to object for state serialization
+    const cartObj = Object.fromEntries(cart);
+    navigate("/checkout", { state: { cart: cartObj, products: filteredProducts } });
   };
 
   const getCartCount = () => {
@@ -117,7 +126,10 @@ const Products = () => {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-bold text-primary">Our Collection</h1>
           {getCartCount() > 0 && (
-            <Button onClick={() => navigate("/checkout", { state: { cart, products } })}>
+            <Button onClick={() => {
+              const cartObj = Object.fromEntries(cart);
+              navigate("/checkout", { state: { cart: cartObj, products: filteredProducts } });
+            }}>
               View Cart ({getCartCount()})
             </Button>
           )}
@@ -136,8 +148,13 @@ const Products = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Categories</SelectItem>
-              <SelectItem value="Sweatshirts">Sweatshirts</SelectItem>
-              <SelectItem value="Hoodies">Hoodies</SelectItem>
+              <SelectItem value="Sport Accessories">Sport Accessories</SelectItem>
+              <SelectItem value="Electronics">Electronics</SelectItem>
+              <SelectItem value="Clothing">Clothing</SelectItem>
+              <SelectItem value="Accessories">Accessories</SelectItem>
+              <SelectItem value="Home & Decor">Home & Decor</SelectItem>
+              <SelectItem value="Unique Items">Unique Items</SelectItem>
+              <SelectItem value="Other">Other</SelectItem>
             </SelectContent>
           </Select>
           <Select value={brandFilter} onValueChange={setBrandFilter}>
@@ -154,22 +171,11 @@ const Products = () => {
         {/* Products Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredProducts.map((product) => (
-            <div key={product.id} className="bg-card rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
-              <img
-                src={product.image_url || "/placeholder.svg"}
-                alt={product.name}
-                className="w-full h-80 object-cover"
-              />
-              <div className="p-6">
-                <p className="text-sm text-muted-foreground mb-1">{product.brands?.name}</p>
-                <h3 className="text-xl font-bold mb-2">{product.name}</h3>
-                <p className="text-muted-foreground mb-4">{product.description}</p>
-                <div className="flex justify-between items-center">
-                  <span className="text-2xl font-bold text-primary">{product.price} EGP</span>
-                  <Button onClick={() => addToCart(product.id)}>Add to Cart</Button>
-                </div>
-              </div>
-            </div>
+            <ProductCard
+              key={product._id || product.id || Math.random()}
+              product={product}
+              onAddToCart={addToCart}
+            />
           ))}
         </div>
 

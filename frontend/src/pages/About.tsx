@@ -21,10 +21,9 @@ const About = () => {
           <section className="bg-card p-8 rounded-lg shadow-md">
             <h2 className="text-2xl font-bold mb-4 text-primary">Our Beginning</h2>
             <p className="text-lg text-foreground leading-relaxed">
-              Echelon Society was founded in 2017 as a sportswear brand with a vision that extended 
-              beyond fashion. From our inception, we understood that true elegance comes not just 
-              from what we wear, but from the values we uphold and the impact we make on the world 
-              around us.
+              Echelon Society was founded in 2017 with a vision to curate unique and special items. 
+              From our inception, we understood that true value comes not just from what we sell, 
+              but from the uniqueness of our products and the impact we make on the world around us.
             </p>
           </section>
 
@@ -32,15 +31,16 @@ const About = () => {
           <section className="bg-card p-8 rounded-lg shadow-md">
             <h2 className="text-2xl font-bold mb-4 text-primary">Our Evolution</h2>
             <p className="text-lg text-foreground leading-relaxed mb-4">
-              What began as a sportswear venture quickly evolved into something more meaningful. 
+              What began as a platform for unique items quickly evolved into something more meaningful. 
               We transitioned into a fundraising and volunteering organization, dedicating ourselves 
               to supporting those in need within our community. This period taught us the true 
               meaning of service and the profound impact that collective action can have.
             </p>
             <p className="text-lg text-foreground leading-relaxed">
-              Today, Echelon Society has rebranded as an old money fashion house, embodying timeless 
-              elegance and sophisticated style. However, our commitment to philanthropy remains 
-              unwavering. We represent the perfect union of luxury fashion and social responsibility.
+              Today, Echelon Society offers a carefully curated collection of unique items - from 
+              sport accessories to special products that stand out. We maintain our commitment to 
+              quality and uniqueness while dedicating 50% of our profits to supporting lower-income 
+              communities. We represent the perfect union of unique products and social responsibility.
             </p>
           </section>
 
@@ -48,15 +48,16 @@ const About = () => {
           <section className="bg-card p-8 rounded-lg shadow-md">
             <h2 className="text-2xl font-bold mb-4 text-primary">Our Mission</h2>
             <p className="text-lg text-foreground leading-relaxed mb-4">
-              At Echelon Society, we believe that true luxury extends beyond material possessions. 
-              We are committed to maintaining the highest standards in fashion while dedicating 50% 
-              of our profits to supporting lower-income communities. Through our work, we provide 
-              clothing, resources, and support to those who need it most.
+              At Echelon Society, we believe that true value extends beyond material possessions. 
+              We are committed to curating unique and special items - from sport accessories to 
+              electronics, clothing, and home decor - while dedicating 50% of our profits to 
+              supporting lower-income communities. Through our work, we provide resources and 
+              support to those who need it most.
             </p>
             <p className="text-lg text-foreground leading-relaxed">
-              Every piece you purchase from Echelon Society contributes to this mission. Your 
-              investment in our brand directly impacts lives, helping to clothe families and 
-              support community development initiatives across Egypt.
+              Every item you purchase from Echelon Society contributes to this mission. Your 
+              investment in our brand directly impacts lives, helping to support families and 
+              community development initiatives.
             </p>
           </section>
 
@@ -65,9 +66,9 @@ const About = () => {
             <h2 className="text-2xl font-bold mb-4 text-primary">Our Values</h2>
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <h3 className="font-bold text-xl mb-2 text-accent">Excellence</h3>
+                <h3 className="font-bold text-xl mb-2 text-accent">Uniqueness</h3>
                 <p className="text-foreground">
-                  We maintain the highest standards in design, quality, and craftsmanship.
+                  We curate special and unique items that stand out from the ordinary.
                 </p>
               </div>
               <div>
@@ -83,9 +84,9 @@ const About = () => {
                 </p>
               </div>
               <div>
-                <h3 className="font-bold text-xl mb-2 text-accent">Elegance</h3>
+                <h3 className="font-bold text-xl mb-2 text-accent">Quality</h3>
                 <p className="text-foreground">
-                  Timeless style that transcends trends and celebrates sophistication.
+                  We maintain the highest standards in product selection and quality.
                 </p>
               </div>
             </div>
@@ -115,8 +116,8 @@ const About = () => {
             <h2 className="text-3xl font-bold mb-4">A Higher Standard</h2>
             <p className="text-xl leading-relaxed max-w-2xl mx-auto">
               This is more than our tagline—it's our promise. At Echelon Society, we hold 
-              ourselves to a higher standard in everything we do, from the clothes we create 
-              to the communities we serve. Join us in this journey of elegance and impact.
+              ourselves to a higher standard in everything we do, from the unique items we curate 
+              to the communities we serve. Join us in this journey of quality, uniqueness, and impact.
             </p>
           </section>
         </div>

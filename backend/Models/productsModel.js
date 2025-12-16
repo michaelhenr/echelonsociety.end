@@ -1,19 +1,17 @@
-import { supabaseAdmin } from '../DB/supabaseClient.js'
+import Product from './Product.js'
 
 export async function getProducts(){
-  const { data, error } = await supabaseAdmin.from('products').select('*')
-  if(error) throw error
-  return data
+  const products = await Product.find()
+  return products
 }
 
-export async function createProduct(product){
-  const { data, error } = await supabaseAdmin.from('products').insert(product).select()
-  if(error) throw error
-  return data
+export async function createProduct(productData){
+  const product = new Product(productData)
+  const savedProduct = await product.save()
+  return savedProduct
 }
 
 export async function deleteProduct(id){
-  const { data, error } = await supabaseAdmin.from('products').delete().eq('id', id)
-  if(error) throw error
-  return data
+  const deletedProduct = await Product.findByIdAndDelete(id)
+  return deletedProduct
 }

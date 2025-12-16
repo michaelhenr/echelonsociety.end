@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+// Client entries removed - can be added to backend if needed
 import logo from "@/assets/logo.jpg";
 import bgImage from "@/assets/bg-logo-1.jpg";
 
@@ -31,12 +31,7 @@ const RoleSelection = () => {
     }
 
     try {
-      const { error } = await supabase
-        .from("client_entries")
-        .insert([{ name: clientName.trim() }]);
-
-      if (error) throw error;
-
+      // TODO: Add client entries to backend if needed
       toast({
         title: "Welcome!",
         description: `Welcome to Echelon, ${clientName}!`,

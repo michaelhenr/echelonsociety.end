@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import api from "@/lib/api";
 import { useNavigate } from "react-router-dom";
 import bgLogo8 from "@/assets/bg-logo-8.jpg";
 
@@ -32,14 +32,12 @@ const SubmitBrand = () => {
     }
 
     try {
-      const { error } = await supabase.from("brands").insert({
+      await api.createBrand({
         name: formData.name,
         description: formData.description,
         contact_email: formData.email,
         contact_phone: formData.phone,
       });
-
-      if (error) throw error;
 
       toast({
         title: "Success!",

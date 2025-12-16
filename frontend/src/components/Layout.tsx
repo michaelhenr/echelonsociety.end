@@ -3,7 +3,8 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import api from "@/lib/api";
+// Newsletter subscription removed - can be added to backend if needed
 import { ChatBot } from "@/components/ChatBot";
 import logo from "@/assets/logo.jpg";
 
@@ -17,41 +18,15 @@ interface LayoutProps {
  * Includes hidden admin access via logo clicks
  */
 export const Layout = ({ children, showNav = true }: LayoutProps) => {
-  const [logoClicks, setLogoClicks] = useState(0);
-  const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
-  const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
 
   const handleLogoClick = () => {
-    const newClicks = logoClicks + 1;
-    
-    // Single click navigates to home only if not already there
-    if (newClicks === 1 && location.pathname !== "/home") {
+    // Simple logo click - navigate to home
+    if (location.pathname !== "/home") {
       navigate("/home");
-    }
-    
-    setLogoClicks(newClicks);
-    
-    if (newClicks === 5) {
-      setShowPasswordPrompt(true);
-      setLogoClicks(0);
-    }
-    
-    setTimeout(() => setLogoClicks(0), 3000);
-  };
-
-  const handlePasswordSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password === "333") {
-      navigate("/admin");
-      setShowPasswordPrompt(false);
-      setPassword("");
-    } else {
-      alert("Incorrect password");
-      setPassword("");
     }
   };
 
@@ -68,12 +43,7 @@ export const Layout = ({ children, showNav = true }: LayoutProps) => {
     }
 
     try {
-      const { error } = await supabase
-        .from("newsletter_subscribers")
-        .insert({ email });
-
-      if (error) throw error;
-
+      // TODO: Add newsletter subscription to backend
       toast({
         title: "Success!",
         description: "You'll receive 10% off your next order!",
@@ -108,8 +78,8 @@ export const Layout = ({ children, showNav = true }: LayoutProps) => {
             </div>
             
             {showNav && (
-              <nav className="flex gap-6">
-                <Link to="/" className="text-foreground hover:text-primary transition-colors">
+              <nav className="flex items-center gap-6">
+                <Link to="/home" className="text-foreground hover:text-primary transition-colors">
                   Home
                 </Link>
                 <Link to="/about" className="text-foreground hover:text-primary transition-colors">
@@ -118,6 +88,25 @@ export const Layout = ({ children, showNav = true }: LayoutProps) => {
                 <Link to="/products" className="text-foreground hover:text-primary transition-colors">
                   Products
                 </Link>
+                {api.getUserRole() === 'admin' && (
+                  <Link to="/admin" className="text-foreground hover:text-primary transition-colors">
+                    Admin
+                  </Link>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    api.signOut();
+                    navigate("/signin");
+                    toast({
+                      title: "Signed out",
+                      description: "You have been signed out successfully.",
+                    });
+                  }}
+                >
+                  Sign Out
+                </Button>
               </nav>
             )}
           </div>
@@ -153,43 +142,6 @@ export const Layout = ({ children, showNav = true }: LayoutProps) => {
       </footer>
 
       <ChatBot />
-
-      {/* Password Prompt Modal */}
-      {showPasswordPrompt && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-card p-6 rounded-lg shadow-lg">
-            <h3 className="text-lg font-bold mb-4">Admin Access</h3>
-            <form onSubmit={handlePasswordSubmit}>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter password"
-                className="w-full px-4 py-2 border border-border rounded-md mb-4"
-                autoFocus
-              />
-              <div className="flex gap-2">
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-primary text-primary-foreground rounded-md"
-                >
-                  Submit
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowPasswordPrompt(false);
-                    setPassword("");
-                  }}
-                  className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
