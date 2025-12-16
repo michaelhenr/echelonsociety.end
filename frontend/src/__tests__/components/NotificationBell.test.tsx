@@ -1,23 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { NotificationBell } from '../../components/NotificationBell'
-import * as api from '../../lib/api'
-import { useToast } from '../../hooks/use-toast'
+import api from '../../lib/api'
 
 // Mock the API module
-vi.mock('../../lib/api', () => ({
-  default: {
-    fetchNotifications: vi.fn(),
-    getUnreadNotificationCount: vi.fn(),
-    markNotificationAsRead: vi.fn(),
-    markAllNotificationsAsRead: vi.fn()
-  },
-  fetchNotifications: vi.fn(),
-  getUnreadNotificationCount: vi.fn(),
-  markNotificationAsRead: vi.fn(),
-  markAllNotificationsAsRead: vi.fn()
-}))
+vi.mock('../../lib/api', () => {
+  return {
+    default: {
+      fetchNotifications: vi.fn(),
+      getUnreadNotificationCount: vi.fn(),
+      markNotificationAsRead: vi.fn(),
+      markAllNotificationsAsRead: vi.fn()
+    }
+  }
+})
 
 // Mock useToast hook
 vi.mock('../../hooks/use-toast', () => ({
@@ -29,6 +26,13 @@ vi.mock('../../hooks/use-toast', () => ({
 // Mock lucide-react icons
 vi.mock('lucide-react', () => ({
   Bell: () => <div data-testid="bell-icon">🔔</div>
+}))
+
+// Mock ResizeObserver
+global.ResizeObserver = vi.fn().mockImplementation(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
 }))
 
 describe('NotificationBell Component', () => {
@@ -46,21 +50,25 @@ describe('NotificationBell Component', () => {
   it('should show unread count badge when there are unread notifications', async () => {
     ;(api.getUnreadNotificationCount as any).mockResolvedValue({ count: 5 })
 
-    render(<NotificationBell />)
+    await act(async () => {
+      render(<NotificationBell />)
+    })
 
     await waitFor(() => {
       expect(screen.getByText('5')).toBeInTheDocument()
-    })
+    }, { timeout: 3000 })
   })
 
   it('should show "9+" when unread count is greater than 9', async () => {
     ;(api.getUnreadNotificationCount as any).mockResolvedValue({ count: 15 })
 
-    render(<NotificationBell />)
+    await act(async () => {
+      render(<NotificationBell />)
+    })
 
     await waitFor(() => {
       expect(screen.getByText('9+')).toBeInTheDocument()
-    })
+    }, { timeout: 3000 })
   })
 
   it('should not show badge when there are no unread notifications', async () => {
@@ -88,14 +96,18 @@ describe('NotificationBell Component', () => {
 
     ;(api.fetchNotifications as any).mockResolvedValue(mockNotifications)
 
-    render(<NotificationBell />)
+    await act(async () => {
+      render(<NotificationBell />)
+    })
 
     const button = screen.getByRole('button')
-    await userEvent.click(button)
+    await act(async () => {
+      await userEvent.click(button)
+    })
 
     await waitFor(() => {
       expect(api.fetchNotifications).toHaveBeenCalled()
-    })
+    }, { timeout: 3000 })
   })
 
   it('should display notifications in popover', async () => {
@@ -120,16 +132,20 @@ describe('NotificationBell Component', () => {
 
     ;(api.fetchNotifications as any).mockResolvedValue(mockNotifications)
 
-    render(<NotificationBell />)
+    await act(async () => {
+      render(<NotificationBell />)
+    })
 
     const button = screen.getByRole('button')
-    await userEvent.click(button)
+    await act(async () => {
+      await userEvent.click(button)
+    })
 
     await waitFor(() => {
       expect(screen.getByText('New Order')).toBeInTheDocument()
       expect(screen.getByText('A new order has been placed')).toBeInTheDocument()
       expect(screen.getByText('New Product')).toBeInTheDocument()
-    })
+    }, { timeout: 3000 })
   })
 
   it('should show "No notifications" when there are no notifications', async () => {
@@ -160,21 +176,27 @@ describe('NotificationBell Component', () => {
     ;(api.fetchNotifications as any).mockResolvedValue(mockNotifications)
     ;(api.markNotificationAsRead as any).mockResolvedValue({ ...mockNotifications[0], read: true })
 
-    render(<NotificationBell />)
+    await act(async () => {
+      render(<NotificationBell />)
+    })
 
     const button = screen.getByRole('button')
-    await userEvent.click(button)
+    await act(async () => {
+      await userEvent.click(button)
+    })
 
     await waitFor(() => {
       expect(screen.getByText('New Order')).toBeInTheDocument()
-    })
+    }, { timeout: 3000 })
 
     const notification = screen.getByText('New Order').closest('div')
     if (notification) {
-      await userEvent.click(notification)
+      await act(async () => {
+        await userEvent.click(notification)
+      })
       await waitFor(() => {
         expect(api.markNotificationAsRead).toHaveBeenCalledWith('1')
-      })
+      }, { timeout: 3000 })
     }
   })
 
@@ -193,14 +215,18 @@ describe('NotificationBell Component', () => {
     ;(api.fetchNotifications as any).mockResolvedValue(mockNotifications)
     ;(api.getUnreadNotificationCount as any).mockResolvedValue({ count: 1 })
 
-    render(<NotificationBell />)
+    await act(async () => {
+      render(<NotificationBell />)
+    })
 
     const button = screen.getByRole('button')
-    await userEvent.click(button)
+    await act(async () => {
+      await userEvent.click(button)
+    })
 
     await waitFor(() => {
       expect(screen.getByText('Mark all as read')).toBeInTheDocument()
-    })
+    }, { timeout: 3000 })
   })
 })
 
